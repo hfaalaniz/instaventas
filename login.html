@@ -132,7 +132,7 @@
       height: 1px;
       background: var(--color-border);
     }
-    .btn-google {
+    .btn-google, .btn-facebook {
       width: 100%;
       padding: 10px;
       background: var(--color-bg-2);
@@ -149,7 +149,8 @@
       gap: 10px;
       transition: background 0.15s;
     }
-    .btn-google:hover { background: var(--color-bg-3); }
+    .btn-google:hover, .btn-facebook:hover { background: var(--color-bg-3); }
+    .btn-facebook { margin-top: 8px; }
     .google-icon {
       width: 18px; height: 18px;
     }
@@ -217,6 +218,13 @@
         </svg>
         Continuar con Google
       </button>
+
+      <button class="btn-facebook" onclick="handleFacebook()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="#1877F2">
+          <path d="M24 12.073C24 5.405 18.627 0 12 0S0 5.405 0 12.073C0 18.1 4.388 23.094 10.125 24v-8.437H7.078v-3.49h3.047V9.41c0-3.025 1.792-4.697 4.533-4.697 1.312 0 2.686.236 2.686.236v2.97h-1.513c-1.491 0-1.956.93-1.956 1.886v2.268h3.328l-.532 3.49h-2.796V24C19.612 23.094 24 18.1 24 12.073z"/>
+        </svg>
+        Continuar con Facebook
+      </button>
     </div>
 
     <!-- Panel signup -->
@@ -266,6 +274,14 @@
   async function loginWithGoogle() {
     const { error } = await sb.auth.signInWithOAuth({
       provider: 'google',
+      options: { redirectTo: window.location.origin + '/login.html' }
+    });
+    if (error) throw error;
+  }
+
+  async function loginWithFacebook() {
+    const { error } = await sb.auth.signInWithOAuth({
+      provider: 'facebook',
       options: { redirectTo: window.location.origin + '/login.html' }
     });
     if (error) throw error;
@@ -341,6 +357,10 @@
 
   async function handleGoogle() {
     try { await loginWithGoogle(); } catch(e) { showError('login-error', e.message); }
+  }
+
+  async function handleFacebook() {
+    try { await loginWithFacebook(); } catch(e) { showError('login-error', e.message); }
   }
 
   // Enter para enviar formulario
