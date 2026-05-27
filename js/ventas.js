@@ -40,6 +40,16 @@ async function initVentas() {
 
   if (getStoreId()) {
     try {
+      // Cargar config del bot desde Supabase
+      const cfg = await dbGetConfig();
+      if (cfg?.bot && Object.keys(cfg.bot).length) {
+        Object.assign(APP_STATE.bot, cfg.bot);
+        loadBotFromState();
+        renderKeywordsList();
+      }
+    } catch (e) { console.warn('dbGetConfig bot:', e); }
+
+    try {
       const convs = await dbGetConversations(null, 50);
       if (convs.length) {
         APP_STATE.bot_history = convs;
@@ -165,6 +175,12 @@ function saveBotConfig() {
   b.msgs.followup = document.getElementById('followup-msg')?.value;
 
   saveState();
+
+  // Persistir en Supabase
+  if (getStoreId()) {
+    dbSaveConfig('bot', b).catch(e => console.warn('dbSaveConfig bot:', e));
+  }
+
   showToast('✓ Bot guardado correctamente', 'success');
 
   // Update dashboard metric
