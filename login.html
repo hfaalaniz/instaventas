@@ -283,7 +283,10 @@
   async function loginWithFacebook() {
     const { error } = await sb.auth.signInWithOAuth({
       provider: 'facebook',
-      options: { redirectTo: window.location.origin + '/login.html' }
+      options: {
+        redirectTo: window.location.origin + '/login.html',
+        scopes: 'public_profile'
+      }
     });
     if (error) throw error;
   }
