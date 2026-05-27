@@ -12,12 +12,24 @@ const MOCK_CARTS = [
 ];
 
 let cartFilter = 'all';
+let liveCarts  = [...MOCK_CARTS];
 
-function initCarrito() {
+async function initCarrito() {
   loadCarritoFromState();
-  renderCartTable(MOCK_CARTS);
+  renderCartTable(liveCarts);
   bindCarritoEvents();
   updateCartKPIs();
+
+  if (getStoreId()) {
+    try {
+      const dbCarts = await dbGetCarts();
+      if (dbCarts.length) {
+        liveCarts = dbCarts;
+        renderCartTable(liveCarts);
+        updateCartKPIs();
+      }
+    } catch (e) { console.warn('dbGetCarts:', e); }
+  }
 }
 
 function loadCarritoFromState() {
@@ -75,7 +87,7 @@ function bindCarritoEvents() {
       document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       cartFilter = btn.dataset.filter;
-      const filtered = cartFilter === 'all' ? MOCK_CARTS : MOCK_CARTS.filter(c => c.status === cartFilter);
+      const filtered = cartFilter === 'all' ? liveCarts : liveCarts.filter(c => c.status === cartFilter);
       renderCartTable(filtered);
     });
   });
@@ -104,10 +116,10 @@ function saveCarritoConfig() {
 }
 
 function updateCartKPIs() {
-  const abandoned = MOCK_CARTS.filter(c => c.status === 'pending').length;
-  const recovered = MOCK_CARTS.filter(c => c.status === 'recovered').length;
-  const sent      = MOCK_CARTS.reduce((sum, c) => sum + c.reminder, 0);
-  const amount    = MOCK_CARTS.filter(c => c.status === 'recovered').reduce((s, c) => s + c.amount, 0);
+  const abandoned = liveCarts.filter(c => c.status === 'pending').length;
+  const recovered = liveCarts.filter(c => c.status === 'recovered').length;
+  const sent      = liveCarts.reduce((sum, c) => sum + (c.reminder || 0), 0);
+  const amount    = liveCarts.filter(c => c.status === 'recovered').reduce((s, c) => s + c.amount, 0);
 
   setTextContent('cart-total-abandoned', abandoned);
   setTextContent('cart-total-recovered', recovered);
@@ -176,23 +188,40 @@ function buildCartRow(c) {
   `;
 }
 
-function sendReminder(cartId) {
-  const cart = MOCK_CARTS.find(c => c.id === cartId);
+async function sendReminder(cartId) {
+  const cart = liveCarts.find(c => c.id === cartId);
   if (!cart) return;
 
-  const reminderNum = Math.min(cart.reminder, 3);
+  const reminderNum = Math.min((cart.reminder || 0) + 1, 3);
   const config = APP_STATE.carrito;
   const msg = buildReminderMessage(reminderNum, cart, config);
 
+  // Enviar email si hay proveedor configurado
+  if (cart.email && getStoreId()) {
+    try {
+      await fetch(`${FUNCTIONS_URL}/send-email`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` },
+        body: JSON.stringify({
+          store_id: getStoreId(),
+          to: cart.email,
+          subject: `Recordatorio #${reminderNum} — Tu carrito te espera`,
+          text: msg
+        })
+      });
+    } catch (e) { console.warn('send-email:', e); }
+  }
+
+  // Actualizar en BD
+  cart.reminder = reminderNum;
+  if (reminderNum >= 3) cart.status = 'expired';
+  if (getStoreId()) {
+    try { await dbSaveCart(cart); } catch (e) { console.warn('dbSaveCart:', e); }
+  }
+
   showToast(`✓ Recordatorio #${reminderNum} enviado a ${cart.name}`, 'success');
-
-  // Simulate updating state
-  cart.reminder = Math.min(cart.reminder + 1, 3);
-  if (cart.reminder > 3) cart.status = 'expired';
-  renderCartTable(MOCK_CARTS.filter(c => cartFilter === 'all' ? true : c.status === cartFilter));
+  renderCartTable(liveCarts.filter(c => cartFilter === 'all' ? true : c.status === cartFilter));
   updateCartKPIs();
-
-  console.log('Mensaje a enviar:', msg);
 }
 
 function buildReminderMessage(num, cart, config) {
@@ -212,14 +241,14 @@ function buildReminderMessage(num, cart, config) {
 }
 
 function viewCartDetail(cartId) {
-  const cart = MOCK_CARTS.find(c => c.id === cartId);
+  const cart = liveCarts.find(c => c.id === cartId);
   if (!cart) return;
   showToast(`${cart.name} — ${formatCurrency(cart.amount)} — ${cart.status}`, 'success');
 }
 
 function exportCarritosCSV() {
   const rows = [['ID','Cliente','Email','Producto','Monto','Estado','Recordatorio','Hace','Canal']];
-  const carts = cartFilter === 'all' ? MOCK_CARTS : MOCK_CARTS.filter(c => c.status === cartFilter);
+  const carts = cartFilter === 'all' ? liveCarts : liveCarts.filter(c => c.status === cartFilter);
   carts.forEach(c => rows.push([c.id, c.name, c.email, c.product, c.amount, c.status, c.reminder, c.ago, c.source]));
   const csv = rows.map(r => r.map(v => `"${v}"`).join(',')).join('\n');
   const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
@@ -242,12 +271,15 @@ function openAddCartModal() {
     id:       'C' + String(Date.now()).slice(-4),
     name, email, product, amount,
     status:   'pending',
-    reminder: 1,
+    reminder: 0,
     ago:      'ahora',
     source:   'Manual'
   };
-  MOCK_CARTS.unshift(newCart);
-  renderCartTable(cartFilter === 'all' ? MOCK_CARTS : MOCK_CARTS.filter(c => c.status === cartFilter));
+  liveCarts.unshift(newCart);
+  if (getStoreId()) {
+    try { await dbSaveCart(newCart); } catch (e) { console.warn('dbSaveCart:', e); }
+  }
+  renderCartTable(cartFilter === 'all' ? liveCarts : liveCarts.filter(c => c.status === cartFilter));
   updateCartKPIs();
   showToast(`✓ Carrito de ${name} agregado`, 'success');
 }

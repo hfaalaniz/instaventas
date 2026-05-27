@@ -26,3 +26,6 @@ let STORE_ID = null;
 
 function setStoreId(id) { STORE_ID = id; }
 function getStoreId()   { return STORE_ID; }
+
+// Edge Function base URL
+const FUNCTIONS_URL = SUPABASE_URL + '/functions/v1';

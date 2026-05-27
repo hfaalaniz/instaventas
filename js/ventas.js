@@ -31,13 +31,24 @@ const BOT_HISTORY_MOCK = [
 
 let historyFilter = 'all';
 
-function initVentas() {
+async function initVentas() {
   loadBotFromState();
   renderKeywordsList();
   bindVentasEvents();
-  startBotMetricsUpdate();
   renderBotHistory();
   bindHistoryFilters();
+
+  if (getStoreId()) {
+    try {
+      const convs = await dbGetConversations(null, 50);
+      if (convs.length) {
+        APP_STATE.bot_history = convs;
+        renderBotHistory(historyFilter);
+      }
+    } catch (e) { console.warn('dbGetConversations:', e); }
+  }
+
+  startBotMetricsUpdate();
 }
 
 function loadBotFromState() {
@@ -237,21 +248,26 @@ function fillTemplate(template) {
 
 // ── Bot metrics ───────────────────────────────────────────────
 
-function startBotMetricsUpdate() {
-  const update = () => {
-    const tEl = document.getElementById('bot-chats-today');
-    const cEl = document.getElementById('bot-conversions');
-    const iEl = document.getElementById('bot-ig-chats');
-    const wEl = document.getElementById('bot-wa-chats');
-    if (tEl) tEl.textContent = rand(30, 48);
-    if (cEl) cEl.textContent = rand(10, 18);
-    if (iEl) iEl.textContent = rand(18, 28);
-    if (wEl) wEl.textContent = rand(10, 20);
+async function startBotMetricsUpdate() {
+  const update = async () => {
+    const history = APP_STATE.bot_history || [];
+    const today   = new Date().toLocaleDateString('es-AR');
+    const todayChats = history.filter(h => h.date === 'Hoy' || h.date === today);
+    const total    = todayChats.length || 0;
+    const convs    = todayChats.filter(h => h.converted).length || 0;
+    const igChats  = todayChats.filter(h => h.channel === 'instagram').length || 0;
+    const waChats  = todayChats.filter(h => h.channel === 'whatsapp').length || 0;
+
+    const setKV = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+    setKV('bot-chats-today',  total  || '—');
+    setKV('bot-conversions',  convs  || '—');
+    setKV('bot-ig-chats',     igChats || '—');
+    setKV('bot-wa-chats',     waChats || '—');
     const mEl = document.getElementById('mod-bot-metric');
-    if (mEl) mEl.textContent = rand(93, 99) + '% respuesta';
+    if (mEl) mEl.textContent = total ? Math.round(convs / total * 100) + '% conv.' : 'Sin datos';
   };
-  update();
-  setInterval(update, 12000);
+  await update();
+  setInterval(update, 30000);
 }
 
 // ── Historial de conversaciones ───────────────────────────────

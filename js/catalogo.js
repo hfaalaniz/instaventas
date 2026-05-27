@@ -16,12 +16,21 @@ let catalogCatFilter = '';
 let catalogSort     = 'name';
 let editingProductId = null;
 
-function initCatalogo() {
-  // Mezclar demo con productos del estado
+async function initCatalogo() {
   catalogProducts = [...DEMO_PRODUCTS, ...(APP_STATE.catalogo.products || [])];
   buildCategoryDatalist();
   renderProductGrid();
   bindCatalogoEvents();
+
+  if (getStoreId()) {
+    const dbProds = await dbGetProducts();
+    if (dbProds.length) {
+      catalogProducts = [...DEMO_PRODUCTS, ...dbProds];
+      APP_STATE.catalogo.products = dbProds;
+      buildCategoryDatalist();
+      renderProductGrid();
+    }
+  }
 }
 
 function buildCategoryDatalist() {
@@ -140,9 +149,16 @@ function saveProduct() {
     catalogProducts.unshift(product);
   }
 
-  // Persist only non-demo products
   APP_STATE.catalogo.products = catalogProducts.filter(p => !DEMO_PRODUCTS.find(d => d.id === p.id));
   saveState();
+
+  if (getStoreId()) {
+    try {
+      const newId = await dbSaveProduct(product);
+      if (!editingProductId) product.id = newId;
+    } catch (e) { console.warn('dbSaveProduct:', e); }
+  }
+
   buildCategoryDatalist();
   renderProductGrid();
   closeProductModal();
@@ -154,22 +170,28 @@ function editProduct(id) {
   if (p) openProductModal(p);
 }
 
-function duplicateProduct(id) {
+async function duplicateProduct(id) {
   const p = catalogProducts.find(p => p.id === id);
   if (!p) return;
   const copy = { ...p, id: 'P' + Date.now(), name: p.name + ' (copia)', sku: '' };
   catalogProducts.unshift(copy);
   APP_STATE.catalogo.products = catalogProducts.filter(p => !DEMO_PRODUCTS.find(d => d.id === p.id));
   saveState();
+  if (getStoreId()) {
+    try { await dbSaveProduct(copy); } catch (e) { console.warn('dbSaveProduct:', e); }
+  }
   renderProductGrid();
   showToast('✓ Producto duplicado', 'success');
 }
 
-function deleteProduct(id) {
+async function deleteProduct(id) {
   if (!confirm('¿Eliminár este producto?')) return;
   catalogProducts = catalogProducts.filter(p => p.id !== id);
   APP_STATE.catalogo.products = catalogProducts.filter(p => !DEMO_PRODUCTS.find(d => d.id === p.id));
   saveState();
+  if (getStoreId() && id.length > 10) {
+    try { await dbDeleteProduct(id); } catch (e) { console.warn('dbDeleteProduct:', e); }
+  }
   buildCategoryDatalist();
   renderProductGrid();
   showToast('Producto eliminado', 'success');

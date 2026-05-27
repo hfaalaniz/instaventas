@@ -8,12 +8,21 @@ const CAMPAIGN_HISTORY_MOCK = [
   { id: 'cam3', subject: '💙 Te extrañamos — Volvé con 15% OFF', segment: 'Inactivos', sent: 54, opened: 21, clicked: 8, date: '2026-05-05' }
 ];
 
-function initEmail() {
+async function initEmail() {
   loadEmailFromState();
   renderSubscribersList();
   renderCampaignTable();
   bindEmailEvents();
   updateEmailKPIs();
+
+  if (getStoreId()) {
+    try {
+      const [subs, camps] = await Promise.all([dbGetSubscribers(), dbGetCampaigns()]);
+      if (subs.length)  { APP_STATE.email.subscribers = subs; renderSubscribersList(); }
+      if (camps.length) { APP_STATE.email.campaigns   = camps; renderCampaignTable(); }
+      updateEmailKPIs();
+    } catch (e) { console.warn('initEmail DB:', e); }
+  }
 }
 
 function loadEmailFromState() {
@@ -90,22 +99,37 @@ function renderSubscribersList() {
   document.getElementById('email-subscribers').textContent = subs.length;
 }
 
-function addSubscriber(email) {
+async function addSubscriber(email) {
   if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     showToast('Email inválido', 'error'); return;
   }
   const subs = APP_STATE.email.subscribers;
   if (subs.find(s => s.email === email)) { showToast('Ya existe este suscriptor', 'error'); return; }
-  subs.push({ email, date: new Date().toLocaleDateString('es-AR') });
-  saveState();
+
+  if (getStoreId()) {
+    try {
+      await dbAddSubscriber(email, '', 'manual');
+      const updated = await dbGetSubscribers();
+      APP_STATE.email.subscribers = updated;
+    } catch (e) {
+      showToast(e.message || 'Error al agregar', 'error'); return;
+    }
+  } else {
+    subs.push({ email, date: new Date().toLocaleDateString('es-AR') });
+    saveState();
+  }
   renderSubscribersList();
   updateEmailKPIs();
   showToast(`✓ ${email} agregado`, 'success');
 }
 
-function removeSubscriber(idx) {
+async function removeSubscriber(idx) {
+  const sub = APP_STATE.email.subscribers[idx];
   APP_STATE.email.subscribers.splice(idx, 1);
   saveState();
+  if (getStoreId() && sub?.id) {
+    try { await dbRemoveSubscriber(sub.id); } catch (e) { console.warn('dbRemoveSubscriber:', e); }
+  }
   renderSubscribersList();
   updateEmailKPIs();
   showToast('Suscriptor eliminado', 'success');
@@ -174,7 +198,7 @@ function renderCampaignTable() {
   `;
 }
 
-function sendCampaign() {
+async function sendCampaign() {
   const subject = document.getElementById('campaign-subject')?.value?.trim();
   const segment = document.getElementById('campaign-segment')?.value;
   const body    = document.getElementById('campaign-body')?.value?.trim();
@@ -191,27 +215,45 @@ function sendCampaign() {
   btn.innerHTML = '<i class="ti ti-loader"></i> Enviando...';
   btn.disabled = true;
 
-  setTimeout(() => {
+  let sent = 0;
+  try {
+    if (getStoreId() && total > 0) {
+      for (const sub of subs) {
+        try {
+          await fetch(`${FUNCTIONS_URL}/send-email`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` },
+            body: JSON.stringify({ store_id: getStoreId(), to: sub.email, subject, text: body })
+          });
+          sent++;
+        } catch {}
+      }
+    }
+
     const campaign = {
       id: 'cam' + Date.now(), subject,
       segment: { all: 'Todos', active: 'Activos', inactive: 'Inactivos', abandoned: 'Carrito' }[segment] || 'Todos',
-      sent: total, opened: Math.round(total * 0.38), clicked: Math.round(total * 0.12),
+      sent: sent || total, opened: 0, clicked: 0,
       date: new Date().toLocaleDateString('es-AR')
     };
     APP_STATE.email.campaigns.push(campaign);
+    if (getStoreId()) { try { await dbSaveCampaign(campaign); } catch {} }
     saveState();
     renderCampaignTable();
     if (result) {
       result.style.display = 'block';
       result.className = 'notification notif-success';
-      result.innerHTML = `<i class="ti ti-circle-check"></i> Campaña "<strong>${subject}</strong>" enviada a ${total} suscriptores.`;
+      result.innerHTML = `<i class="ti ti-circle-check"></i> Campaña "<strong>${subject}</strong>" enviada a ${sent || total} suscriptores.`;
     }
     document.getElementById('campaign-subject').value = '';
     document.getElementById('campaign-body').value    = '';
+    showToast('✓ Campaña enviada', 'success');
+  } catch (e) {
+    showToast('Error al enviar: ' + e.message, 'error');
+  } finally {
     btn.innerHTML = orig;
     btn.disabled  = false;
-    showToast('✓ Campaña enviada', 'success');
-  }, 1800);
+  }
 }
 
 function previewCampaign() {
@@ -318,11 +360,29 @@ async function testEmailConnection() {
   const orig   = btn.innerHTML;
   btn.innerHTML = '<i class="ti ti-loader"></i> Probando...';
   btn.disabled = true;
-  await new Promise(r => setTimeout(r, 1500));
-  if (result) {
-    result.style.display = 'block';
-    result.className = 'notification notif-success';
-    result.innerHTML = '<i class="ti ti-circle-check"></i> Conexión simulada OK. Configurá las credenciales reales para envíos efectivos.';
+
+  const testTo = APP_STATE.config.store_email || APP_STATE.email.smtp.from;
+  if (!testTo) {
+    if (result) { result.style.display = 'block'; result.className = 'notification notif-error'; result.innerHTML = '<i class="ti ti-alert-circle"></i> Configurá el email de la tienda primero.'; }
+    btn.innerHTML = orig; btn.disabled = false; return;
+  }
+
+  try {
+    const res = await fetch(`${FUNCTIONS_URL}/send-email`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` },
+      body: JSON.stringify({ store_id: getStoreId(), to: testTo, subject: '✓ Test de conexión — InstaVentas', text: 'El sistema de email está funcionando correctamente.' })
+    });
+    const ok = res.ok || res.status === 200;
+    if (result) {
+      result.style.display = 'block';
+      result.className = ok ? 'notification notif-success' : 'notification notif-error';
+      result.innerHTML = ok
+        ? `<i class="ti ti-circle-check"></i> Email de prueba enviado a ${testTo}`
+        : `<i class="ti ti-alert-circle"></i> Error al enviar. Verificá las credenciales del proveedor.`;
+    }
+  } catch (e) {
+    if (result) { result.style.display = 'block'; result.className = 'notification notif-error'; result.innerHTML = '<i class="ti ti-alert-circle"></i> Error de red: ' + e.message; }
   }
   btn.innerHTML = orig;
   btn.disabled  = false;

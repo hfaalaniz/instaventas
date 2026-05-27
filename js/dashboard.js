@@ -40,25 +40,18 @@ let kpiInterval  = null;
 let currentChartType = 'ventas';
 let dashboardInitialized = false;
 
-function initDashboard() {
-  // Set today's date
+async function initDashboard() {
   const todayEl = document.getElementById('today-date');
   if (todayEl) todayEl.textContent = getTodayFormatted();
 
-  // Init KPIs
   updateDashboardKPIs();
-
-  // Init chart
   initSalesChart('ventas');
+  await populateInitialFeed();
 
-  // Init feed with some items
-  populateInitialFeed();
-
-  // Guardar sólo un par de intervalos — limpiar anteriores si los hubiera
   if (kpiInterval)  clearInterval(kpiInterval);
   if (feedInterval) clearInterval(feedInterval);
-  kpiInterval  = setInterval(updateDashboardKPIs, 8000);
-  feedInterval = setInterval(addFeedItem, 5000);
+  kpiInterval  = setInterval(updateDashboardKPIs, 30000);
+  feedInterval = setInterval(addFeedItem, 15000);
   dashboardInitialized = true;
 
   // Period tabs
@@ -119,33 +112,54 @@ function getPeriodMultiplier() {
   return { hoy: 1, semana: 7, mes: 30 }[currentPeriod] || 1;
 }
 
-function updateDashboardKPIs(animate = false) {
+async function updateDashboardKPIs(animate = false) {
+  const setKPI = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+
+  if (getStoreId()) {
+    try {
+      const [orderStats, carts, convs] = await Promise.all([
+        dbGetOrderStats(),
+        dbGetCarts(),
+        dbGetConversations(null, 100)
+      ]);
+
+      const totalSales    = orderStats.totalSales   || 0;
+      const totalOrders   = orderStats.totalOrders  || 0;
+      const recovered     = (carts || []).filter(c => c.status === 'recovered').reduce((s, c) => s + c.amount, 0);
+      const pending       = (carts || []).filter(c => c.status === 'pending').length;
+      const total         = (carts || []).length;
+      const abandonRate   = total ? Math.round(pending / total * 100) : 0;
+      const botChats      = (convs || []).length;
+      const botConverted  = (convs || []).filter(c => c.converted).length;
+
+      setKPI('kpi-ventas',       formatCurrency(totalSales));
+      setKPI('kpi-pedidos',      totalOrders);
+      setKPI('kpi-recuperados',  formatCurrency(recovered));
+      setKPI('kpi-abandon',      abandonRate + '%');
+      setKPI('kpi-bot-chats',    botChats);
+      setKPI('kpi-pixel-events', formatNumber(botConverted));
+
+      setKPI('kpi-ventas-delta',  totalOrders ? '▲ ' + totalOrders + ' órdenes hoy' : '— sin ventas hoy');
+      setKPI('kpi-pedidos-delta', '— actualizado ahora');
+      setKPI('kpi-recup-delta',   recovered > 0 ? '▲ ' + formatCurrency(recovered) + ' recuperados' : '— sin recuperaciones');
+      setKPI('kpi-bot-delta',     botChats ? botConverted + ' convertidos de ' + botChats : '— sin actividad');
+
+      APP_STATE.dashboard.totalSales    = totalSales;
+      APP_STATE.dashboard.totalOrders   = totalOrders;
+      APP_STATE.dashboard.totalRecovered= recovered;
+      APP_STATE.dashboard.abandonRate   = abandonRate;
+      return;
+    } catch (e) { console.warn('updateDashboardKPIs:', e); }
+  }
+
+  // Fallback a datos del estado local
   const s = APP_STATE.dashboard;
-  const mult = getPeriodMultiplier();
-  const ventas     = (s.totalSales     * mult) + rand(-8000, 12000) * mult;
-  const pedidos    = (s.totalOrders    * mult) + rand(-2, 4) * mult;
-  const recuperados= (s.totalRecovered * mult) + rand(-1000, 3000) * mult;
-  const abandon    = s.abandonRate    + rand(-5, 5);
-  const botChats   = rand(28, 45) * mult;
-  const pixelEvts  = rand(900, 1200) * mult;
-
-  const setKPI = (id, val) => {
-    const el = document.getElementById(id);
-    if (el) el.textContent = val;
-  };
-
-  setKPI('kpi-ventas', formatCurrency(Math.max(ventas, 0)));
-  setKPI('kpi-pedidos', pedidos);
-  setKPI('kpi-recuperados', formatCurrency(Math.max(recuperados, 0)));
-  setKPI('kpi-abandon', Math.max(abandon, 0) + '%');
-  setKPI('kpi-bot-chats', botChats);
-  setKPI('kpi-pixel-events', formatNumber(pixelEvts));
-
-  // Deltas
-  setKPI('kpi-ventas-delta', '▲ ' + rand(5, 22) + '% vs ayer');
-  setKPI('kpi-pedidos-delta', '▲ ' + rand(2, 15) + '% vs ayer');
-  setKPI('kpi-recup-delta', '— ' + rand(1, 4) + ' carritos recuperados');
-  setKPI('kpi-bot-delta', '▲ ' + rand(3, 18) + '% vs ayer');
+  setKPI('kpi-ventas',       formatCurrency(s.totalSales || 0));
+  setKPI('kpi-pedidos',      s.totalOrders || 0);
+  setKPI('kpi-recuperados',  formatCurrency(s.totalRecovered || 0));
+  setKPI('kpi-abandon',      (s.abandonRate || 0) + '%');
+  setKPI('kpi-bot-chats',    '—');
+  setKPI('kpi-pixel-events', '—');
 }
 
 function exportDashboardCSV() {
@@ -248,16 +262,34 @@ function updateChartData(type) {
   salesChart.update('active');
 }
 
-function populateInitialFeed() {
-  const items = [
-    { type: 'Venta',      cls: 'badge-venta',   msg: 'María G. compró Producto A — $12.500',              ago: 'hace 2min' },
-    { type: 'Carrito',    cls: 'badge-carrito',  msg: 'Recordatorio enviado a lucas@mail.com',              ago: 'hace 8min' },
-    { type: 'Venta',      cls: 'badge-venta',   msg: 'Carlos R. compró Producto B — $8.200',               ago: 'hace 15min' },
-    { type: 'Pixel',      cls: 'badge-pixel',   msg: 'Evento "AddToCart" registrado — Instagram',          ago: 'hace 21min' },
-    { type: 'Recuperado', cls: 'badge-recup',   msg: 'Ana P. completó su compra tras recordatorio — $6.900', ago: 'hace 34min' }
-  ];
+async function populateInitialFeed() {
   const list = document.getElementById('feed-list');
   if (!list) return;
+
+  if (getStoreId()) {
+    try {
+      const events = await dbGetEvents(8);
+      if (events.length) {
+        const clsMap = { bot: 'badge-bot', pixel: 'badge-pixel', venta: 'badge-venta', carrito: 'badge-carrito', recuperado: 'badge-recup' };
+        events.forEach(ev => {
+          const ago = timeAgo ? timeAgo(ev.created_at) : 'antes';
+          list.appendChild(buildFeedItem(capitalize(ev.type), clsMap[ev.type] || 'badge-bot', ev.message, ago));
+          feedCount++;
+        });
+        updateFeedCount();
+        return;
+      }
+    } catch (e) { console.warn('populateInitialFeed:', e); }
+  }
+
+  // Fallback mock
+  const items = [
+    { type: 'Venta',      cls: 'badge-venta',   msg: 'María G. compró Producto A — $12.500',               ago: 'hace 2min' },
+    { type: 'Carrito',    cls: 'badge-carrito',  msg: 'Recordatorio enviado a lucas@mail.com',               ago: 'hace 8min' },
+    { type: 'Venta',      cls: 'badge-venta',   msg: 'Carlos R. compró Producto B — $8.200',                ago: 'hace 15min' },
+    { type: 'Pixel',      cls: 'badge-pixel',   msg: 'Evento "AddToCart" registrado — Instagram',           ago: 'hace 21min' },
+    { type: 'Recuperado', cls: 'badge-recup',   msg: 'Ana P. completó su compra tras recordatorio — $6.900', ago: 'hace 34min' }
+  ];
   items.forEach(item => {
     list.appendChild(buildFeedItem(item.type, item.cls, item.msg, item.ago));
     feedCount++;
@@ -265,18 +297,26 @@ function populateInitialFeed() {
   updateFeedCount();
 }
 
-function addFeedItem() {
+async function addFeedItem() {
   const list = document.getElementById('feed-list');
   if (!list) return;
+
+  if (getStoreId()) {
+    try {
+      const events = await dbGetEvents(1);
+      if (events.length) {
+        const ev = events[0];
+        const clsMap = { bot: 'badge-bot', pixel: 'badge-pixel', venta: 'badge-venta', carrito: 'badge-carrito', recuperado: 'badge-recup' };
+        pushFeedItem(capitalize(ev.type), clsMap[ev.type] || 'badge-bot', ev.message);
+        return;
+      }
+    } catch {}
+  }
+
+  // Fallback mock solo si no hay BD
   const group = FEED_EVENTS[Math.floor(Math.random() * FEED_EVENTS.length)];
   const msg   = group.msgs[Math.floor(Math.random() * group.msgs.length)];
-  const item  = buildFeedItem(group.type, group.cls, msg, 'ahora');
-  item.style.opacity = '0';
-  list.insertBefore(item, list.firstChild);
-  setTimeout(() => { item.style.transition = 'opacity 0.4s'; item.style.opacity = '1'; }, 20);
-  if (list.children.length > 8) list.removeChild(list.lastChild);
-  feedCount++;
-  updateFeedCount();
+  pushFeedItem(group.type, group.cls, msg);
 }
 
 function buildFeedItem(type, cls, msg, time) {
