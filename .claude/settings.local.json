@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(Get-ChildItem -Recurse \"c:\\\\Users\\\\Fabian\\\\instaventas\" | Where-Object { !$_.PSIsContainer } | Select-Object FullName, @{N='KB';E={[math]::Round\\($_.Length/1KB,1\\)}})",
+      "Bash(Get-ChildItem -Path \"c:\\\\Users\\\\Fabian\\\\instaventas\" -Recurse)",
+      "Bash(ConvertTo-Csv -NoTypeInformation)",
+      "Bash(out-string)",
+      "Bash(Get-ChildItem -Path \"c:\\\\Users\\\\Fabian\\\\instaventas\" -Force)",
+      "PowerShell(Get-ChildItem -Path \"c:\\\\Users\\\\Fabian\\\\instaventas\" | Where-Object { $_.PSIsContainer } | Select-Object Name)",
+      "PowerShell(Get-ChildItem -Path \"c:\\\\Users\\\\Fabian\\\\instaventas\" -Recurse -File | Select-Object @{N='Ruta relativa';E={$_.FullName -replace [regex]::Escape\\('c:\\\\Users\\\\Fabian\\\\instaventas\\\\'\\)}}, @{N='Tamaño \\(KB\\)';E={[math]::Round\\($_.Length/1KB,2\\)}} | Sort-Object 'Ruta relativa' | Format-Table -AutoSize)"
+    ]
+  }
+}

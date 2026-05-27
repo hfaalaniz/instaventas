@@ -1,0 +1,2168 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Máquina de Ventas Profesional</title>
+
+  <!-- Tabler Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.3.0/dist/tabler-icons.min.css" />
+  <!-- Google Fonts -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&family=DM+Sans:wght@400;500;600&display=swap" />
+  <!-- Supabase JS SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <!-- MercadoPago SDK -->
+  <script src="https://sdk.mercadopago.com/js/v2"></script>
+
+  <!-- CSS modules -->
+  <link rel="stylesheet" href="css/variables.css" />
+  <link rel="stylesheet" href="css/base.css" />
+  <link rel="stylesheet" href="css/layout.css" />
+  <link rel="stylesheet" href="css/dashboard.css" />
+  <link rel="stylesheet" href="css/pagos.css" />
+  <link rel="stylesheet" href="css/carrito.css" />
+  <link rel="stylesheet" href="css/ventas.css" />
+  <link rel="stylesheet" href="css/pixel.css" />
+  <link rel="stylesheet" href="css/auditoria.css" />
+  <link rel="stylesheet" href="css/nuevos.css" />
+</head>
+<body>
+
+<div class="app">
+
+  <!-- HEADER -->
+  <header class="header">
+    <div class="header-inner">
+      <div>
+        <span class="header-badge">Sistema automático · Instagram</span>
+        <h1 class="header-title">Máquina de <span class="accent">Ventas</span> Profesional</h1>
+        <p class="header-sub">Tu negocio vende mientras dormís — 24/7 automatizado</p>
+      </div>
+      <div class="header-status">
+        <span class="status-live"><span class="live-dot"></span>Sistema activo</span>
+        <span class="header-version">v2.0</span>
+        <span class="header-user" id="user-email" style="font-size:11px;color:var(--color-text-3)"></span>
+        <button class="btn-outline btn-sm" id="btn-logout" onclick="logout()" style="font-size:11px;padding:4px 10px">
+          <i class="ti ti-logout"></i> Salir
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- NAV -->
+  <nav class="nav" role="navigation" aria-label="Módulos del sistema">
+    <button class="nav-btn active" data-section="dashboard" aria-selected="true">
+      <i class="ti ti-layout-dashboard"></i> Dashboard
+    </button>
+    <button class="nav-btn" data-section="pagos">
+      <i class="ti ti-credit-card"></i> Pagos
+    </button>
+    <button class="nav-btn" data-section="carrito">
+      <i class="ti ti-shopping-cart"></i> Carrito
+    </button>
+    <button class="nav-btn" data-section="ventas">
+      <i class="ti ti-robot"></i> Auto-ventas
+    </button>
+    <button class="nav-btn" data-section="email">
+      <i class="ti ti-mail"></i> Email
+    </button>
+    <button class="nav-btn" data-section="catalogo">
+      <i class="ti ti-package"></i> Catálogo
+    </button>
+    <button class="nav-btn" data-section="pixel">
+      <i class="ti ti-brand-meta"></i> Pixel
+    </button>
+    <button class="nav-btn" data-section="auditoria">
+      <i class="ti ti-clipboard-check"></i> Auditoría
+    </button>
+    <button class="nav-btn" data-section="configuracion">
+      <i class="ti ti-settings"></i> Config
+    </button>
+    <div class="nav-spacer"></div>
+    <button class="nav-btn nav-btn-icon" id="btn-dark-toggle" title="Modo oscuro/claro" aria-label="Cambiar tema">
+      <i class="ti ti-moon" id="dark-toggle-icon"></i>
+    </button>
+  </nav>
+
+  <!-- CONTENT -->
+  <main class="content">
+
+    <!-- ===== DASHBOARD ===== -->
+    <section class="section active" id="section-dashboard">
+      <div class="section-header">
+        <h2 class="section-title">Panel de control</h2>
+        <div class="section-actions">
+          <span class="date-range-label" id="date-label">Hoy, <span id="today-date"></span></span>
+          <div class="period-tabs" id="period-tabs">
+            <button class="period-tab active" data-period="hoy">Hoy</button>
+            <button class="period-tab" data-period="semana">Semana</button>
+            <button class="period-tab" data-period="mes">Mes</button>
+          </div>
+          <button class="btn-outline btn-sm" id="btn-export-dashboard">
+            <i class="ti ti-download"></i> Exportar
+          </button>
+          <button class="btn-outline btn-sm" id="btn-refresh-dashboard">
+            <i class="ti ti-refresh"></i> Actualizar
+          </button>
+        </div>
+      </div>
+
+      <!-- KPIs principales -->
+      <div class="kpi-grid" id="kpi-grid">
+        <div class="kpi-card" id="kpi-ventas-card">
+          <div class="kpi-icon icon-green"><i class="ti ti-cash"></i></div>
+          <div class="kpi-body">
+            <div class="kpi-value green" id="kpi-ventas">$0</div>
+            <div class="kpi-label">Ventas hoy</div>
+            <div class="kpi-delta positive" id="kpi-ventas-delta">▲ 0%</div>
+          </div>
+        </div>
+        <div class="kpi-card" id="kpi-pedidos-card">
+          <div class="kpi-icon icon-blue"><i class="ti ti-package"></i></div>
+          <div class="kpi-body">
+            <div class="kpi-value" id="kpi-pedidos">0</div>
+            <div class="kpi-label">Pedidos</div>
+            <div class="kpi-delta positive" id="kpi-pedidos-delta">▲ 0%</div>
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-icon icon-amber"><i class="ti ti-rotate-clockwise"></i></div>
+          <div class="kpi-body">
+            <div class="kpi-value amber" id="kpi-recuperados">$0</div>
+            <div class="kpi-label">Recuperado (carritos)</div>
+            <div class="kpi-delta" id="kpi-recup-delta">— 0 carritos</div>
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-icon icon-red"><i class="ti ti-shopping-cart-x"></i></div>
+          <div class="kpi-body">
+            <div class="kpi-value red" id="kpi-abandon">0%</div>
+            <div class="kpi-label">Tasa abandono</div>
+            <div class="kpi-delta negative" id="kpi-abandon-delta">▼ 0%</div>
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-icon icon-green"><i class="ti ti-robot"></i></div>
+          <div class="kpi-body">
+            <div class="kpi-value" id="kpi-bot-chats">0</div>
+            <div class="kpi-label">Chats bot hoy</div>
+            <div class="kpi-delta positive" id="kpi-bot-delta">▲ 0%</div>
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-icon icon-purple"><i class="ti ti-brand-meta"></i></div>
+          <div class="kpi-body">
+            <div class="kpi-value purple" id="kpi-pixel-events">0</div>
+            <div class="kpi-label">Eventos pixel hoy</div>
+            <div class="kpi-delta" id="kpi-pixel-delta">— Facebook + Instagram</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Gráfico de ventas + feed -->
+      <div class="dashboard-grid">
+        <div class="chart-card">
+          <div class="card-header">
+            <span class="card-title"><i class="ti ti-chart-line"></i> Ventas últimos 7 días</span>
+            <div class="chart-tabs">
+              <button class="chart-tab active" data-chart="ventas">Ventas</button>
+              <button class="chart-tab" data-chart="pedidos">Pedidos</button>
+              <button class="chart-tab" data-chart="recuperados">Recuperados</button>
+            </div>
+          </div>
+          <div class="chart-wrapper">
+            <canvas id="sales-chart"></canvas>
+          </div>
+        </div>
+
+        <div class="activity-feed">
+          <div class="feed-header">
+            <span class="live-dot"></span> Actividad en tiempo real
+            <span class="feed-count" id="feed-count">0 eventos</span>
+          </div>
+          <div id="feed-list" class="feed-list"></div>
+        </div>
+      </div>
+
+      <!-- Estado módulos -->
+      <div class="modules-status-grid" id="modules-grid">
+        <div class="module-card" data-goto="pagos">
+          <div class="module-header">
+            <div class="module-icon icon-blue"><i class="ti ti-credit-card"></i></div>
+            <div class="module-info">
+              <div class="module-title">Configuración de pagos</div>
+              <div class="module-sub">Mercado Pago y billeteras</div>
+            </div>
+            <span class="status-badge" id="mod-pagos-status">Configurando</span>
+          </div>
+          <div class="module-body">
+            Recibí pagos con tarjeta, transferencia, efectivo y cripto. Múltiples pasarelas integradas.
+          </div>
+          <div class="module-footer">
+            <span class="module-metric" id="mod-pagos-metric">—</span>
+            <button class="module-btn">Configurar <i class="ti ti-arrow-right"></i></button>
+          </div>
+        </div>
+
+        <div class="module-card" data-goto="carrito">
+          <div class="module-header">
+            <div class="module-icon icon-amber"><i class="ti ti-shopping-cart"></i></div>
+            <div class="module-info">
+              <div class="module-title">Recuperación de carrito</div>
+              <div class="module-sub">Ventas perdidas automáticas</div>
+            </div>
+            <span class="status-badge warn" id="mod-carrito-status">Activo</span>
+          </div>
+          <div class="module-body">
+            Enviá 3 recordatorios automáticos y recuperá ventas con descuento especial.
+          </div>
+          <div class="module-footer">
+            <span class="module-metric" id="mod-carrito-metric">4 pendientes</span>
+            <button class="module-btn">Ver carritos <i class="ti ti-arrow-right"></i></button>
+          </div>
+        </div>
+
+        <div class="module-card" data-goto="ventas">
+          <div class="module-header">
+            <div class="module-icon icon-green"><i class="ti ti-robot"></i></div>
+            <div class="module-info">
+              <div class="module-title">Sistema auto-ventas</div>
+              <div class="module-sub">Bot 24/7 Instagram + WhatsApp</div>
+            </div>
+            <span class="status-badge on" id="mod-bot-status">Activo</span>
+          </div>
+          <div class="module-body">
+            Bot responde DMs de Instagram y WhatsApp. Cotizaciones y ventas automáticas.
+          </div>
+          <div class="module-footer">
+            <span class="module-metric" id="mod-bot-metric">98% respuesta</span>
+            <button class="module-btn">Configurar bot <i class="ti ti-arrow-right"></i></button>
+          </div>
+        </div>
+
+        <div class="module-card" data-goto="pixel">
+          <div class="module-header">
+            <div class="module-icon icon-purple"><i class="ti ti-brand-meta"></i></div>
+            <div class="module-info">
+              <div class="module-title">Pixel publicitario</div>
+              <div class="module-sub">Facebook e Instagram · Meta Ads</div>
+            </div>
+            <span class="status-badge off" id="mod-pixel-status">Sin configurar</span>
+          </div>
+          <div class="module-body">
+            Instalá el pixel de Meta para rastrear conversiones y crear audiencias.
+          </div>
+          <div class="module-footer">
+            <span class="module-metric" id="mod-pixel-metric">0 eventos</span>
+            <button class="module-btn">Instalar pixel <i class="ti ti-arrow-right"></i></button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== PAGOS ===== -->
+    <section class="section" id="section-pagos">
+      <div class="section-header">
+        <h2 class="section-title">Configuración de pagos</h2>
+        <div class="section-actions">
+          <button class="btn-outline btn-sm" id="btn-test-mp">
+            <i class="ti ti-plug"></i> Probar conexión
+          </button>
+          <button class="btn-primary btn-sm" id="btn-save-pagos">
+            <i class="ti ti-device-floppy"></i> Guardar
+          </button>
+        </div>
+      </div>
+
+      <!-- Notificación de estado -->
+      <div class="notification" id="pagos-notification" style="display:none"></div>
+
+      <!-- Tabs de pasarelas -->
+      <div class="gateway-tabs">
+        <button class="gateway-tab active" data-gateway="mercadopago">
+          <img src="https://http2.mlstatic.com/frontend-assets/ui-navigation/5.19.4/mercadopago/logo__large@2x.png" alt="MercadoPago" class="gateway-logo" onerror="this.style.display='none';this.nextElementSibling.style.display='inline'" />
+          <span style="display:none">💳 Mercado Pago</span>
+        </button>
+        <button class="gateway-tab" data-gateway="paypal">💰 PayPal</button>
+        <button class="gateway-tab" data-gateway="stripe">💳 Stripe</button>
+        <button class="gateway-tab" data-gateway="crypto">₿ Cripto</button>
+        <button class="gateway-tab" data-gateway="transferencia">🏦 Transferencia</button>
+      </div>
+
+      <!-- Mercado Pago panel -->
+      <div class="gateway-panel active" id="panel-mercadopago">
+        <div class="form-section">
+          <div class="form-title">
+            <i class="ti ti-key"></i> Credenciales Mercado Pago
+            <a href="https://www.mercadopago.com.ar/developers/panel/app" target="_blank" class="link-help">
+              <i class="ti ti-external-link"></i> Obtener credenciales
+            </a>
+          </div>
+          <div class="mp-env-tabs">
+            <button class="env-tab active" data-env="sandbox">
+              <i class="ti ti-test-pipe"></i> Sandbox (pruebas)
+            </button>
+            <button class="env-tab" data-env="production">
+              <i class="ti ti-rocket"></i> Producción
+            </button>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Access Token <span class="required">*</span></label>
+              <div class="input-with-action">
+                <input type="password" id="mp-access-token" placeholder="TEST-xxxx o APP_USR-xxxx" autocomplete="off" />
+                <button class="btn-icon" onclick="togglePassword('mp-access-token')"><i class="ti ti-eye"></i></button>
+              </div>
+              <span class="field-hint">Usado en el servidor para crear pagos</span>
+            </div>
+            <div class="form-group">
+              <label>Public Key <span class="required">*</span></label>
+              <div class="input-with-action">
+                <input type="text" id="mp-public-key" placeholder="TEST-xxxx o APP_USR-pub-xxxx" />
+                <button class="btn-icon" id="btn-copy-pk" onclick="copyField('mp-public-key')"><i class="ti ti-copy"></i></button>
+              </div>
+              <span class="field-hint">Usada en el frontend del checkout</span>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>País <span class="required">*</span></label>
+              <select id="mp-country">
+                <option value="AR">🇦🇷 Argentina (ARS)</option>
+                <option value="CL">🇨🇱 Chile (CLP)</option>
+                <option value="MX">🇲🇽 México (MXN)</option>
+                <option value="CO">🇨🇴 Colombia (COP)</option>
+                <option value="BR">🇧🇷 Brasil (BRL)</option>
+                <option value="UY">🇺🇾 Uruguay (UYU)</option>
+                <option value="PE">🇵🇪 Perú (PEN)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Webhook URL (notificaciones)</label>
+              <div class="input-with-action">
+                <input type="text" id="mp-webhook" placeholder="https://tu-dominio.com/webhook/mp" readonly />
+                <button class="btn-icon" onclick="copyField('mp-webhook')"><i class="ti ti-copy"></i></button>
+              </div>
+              <span class="field-hint">Configurá esta URL en el panel de MP</span>
+            </div>
+          </div>
+
+          <!-- Test de conexión -->
+          <div class="connection-test" id="mp-connection-test" style="display:none">
+            <div class="test-result" id="mp-test-result"></div>
+          </div>
+        </div>
+
+        <!-- Métodos de pago -->
+        <div class="form-section">
+          <div class="form-title"><i class="ti ti-settings"></i> Métodos de pago habilitados</div>
+          <div class="payment-methods-grid">
+            <div class="payment-method-card" id="pm-card">
+              <div class="pm-icon">💳</div>
+              <div class="pm-info">
+                <div class="pm-name">Tarjeta crédito/débito</div>
+                <div class="pm-brands">Visa · Mastercard · Amex · Naranja</div>
+              </div>
+              <label class="toggle"><input type="checkbox" id="pm-card-toggle" checked /><span class="slider-t"></span></label>
+            </div>
+            <div class="payment-method-card" id="pm-transfer">
+              <div class="pm-icon">🏦</div>
+              <div class="pm-info">
+                <div class="pm-name">Transferencia bancaria</div>
+                <div class="pm-brands">CVU / CBU — Inmediata</div>
+              </div>
+              <label class="toggle"><input type="checkbox" id="pm-transfer-toggle" checked /><span class="slider-t"></span></label>
+            </div>
+            <div class="payment-method-card" id="pm-cash">
+              <div class="pm-icon">🏪</div>
+              <div class="pm-info">
+                <div class="pm-name">Efectivo</div>
+                <div class="pm-brands">Rapipago · Pago Fácil · Cobro Express</div>
+              </div>
+              <label class="toggle"><input type="checkbox" id="pm-cash-toggle" /><span class="slider-t"></span></label>
+            </div>
+            <div class="payment-method-card" id="pm-quota">
+              <div class="pm-icon">📅</div>
+              <div class="pm-info">
+                <div class="pm-name">Cuotas sin interés</div>
+                <div class="pm-brands">Hasta 12 cuotas · Ahora 12/18/30</div>
+              </div>
+              <label class="toggle"><input type="checkbox" id="pm-quota-toggle" checked /><span class="slider-t"></span></label>
+            </div>
+          </div>
+
+          <!-- Cuotas config -->
+          <div class="quota-config" id="quota-config">
+            <div class="form-title" style="font-size:13px;margin-top:1rem">Configuración de cuotas</div>
+            <div class="quota-grid">
+              <div class="quota-item">
+                <label class="toggle-row-inline">
+                  <label class="toggle"><input type="checkbox" checked /><span class="slider-t"></span></label>
+                  Ahora 3
+                </label>
+              </div>
+              <div class="quota-item">
+                <label class="toggle-row-inline">
+                  <label class="toggle"><input type="checkbox" checked /><span class="slider-t"></span></label>
+                  Ahora 6
+                </label>
+              </div>
+              <div class="quota-item">
+                <label class="toggle-row-inline">
+                  <label class="toggle"><input type="checkbox" checked /><span class="slider-t"></span></label>
+                  Ahora 12
+                </label>
+              </div>
+              <div class="quota-item">
+                <label class="toggle-row-inline">
+                  <label class="toggle"><input type="checkbox" /><span class="slider-t"></span></label>
+                  Ahora 18
+                </label>
+              </div>
+              <div class="quota-item">
+                <label class="toggle-row-inline">
+                  <label class="toggle"><input type="checkbox" /><span class="slider-t"></span></label>
+                  Ahora 30
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Checkout Pro vs API -->
+        <div class="form-section">
+          <div class="form-title"><i class="ti ti-layout"></i> Modo de checkout</div>
+          <div class="checkout-modes">
+            <div class="checkout-option selected" id="co-pro" onclick="selectCheckout('pro')">
+              <div class="co-icon">🔗</div>
+              <div class="co-info">
+                <div class="co-name">Checkout Pro</div>
+                <div class="co-desc">Redirige a Mercado Pago — máxima conversión, manejo de fraude automático</div>
+              </div>
+              <div class="co-badge">Recomendado</div>
+              <div class="co-check"><i class="ti ti-circle-check"></i></div>
+            </div>
+            <div class="checkout-option" id="co-api" onclick="selectCheckout('api')">
+              <div class="co-icon">⚙️</div>
+              <div class="co-info">
+                <div class="co-name">Checkout API (Bricks)</div>
+                <div class="co-desc">Formulario embebido en tu tienda — experiencia personalizada</div>
+              </div>
+              <div class="co-check" style="display:none"><i class="ti ti-circle-check"></i></div>
+            </div>
+          </div>
+          <!-- Contenedor del Checkout Brick -->
+          <div id="mp-checkout-brick-container" style="margin-top:1rem;display:none"></div>
+        </div>
+
+        <!-- Preferencia de pago demo -->
+        <div class="form-section">
+          <div class="form-title"><i class="ti ti-test-pipe"></i> Crear preferencia de prueba</div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Producto</label>
+              <input type="text" id="test-product" placeholder="Producto de prueba" value="Pack Premium" />
+            </div>
+            <div class="form-group">
+              <label>Precio (ARS)</label>
+              <input type="number" id="test-price" placeholder="0.00" value="1500" />
+            </div>
+          </div>
+          <button class="btn-primary" id="btn-create-preference">
+            <i class="ti ti-rocket"></i> Generar link de pago MP
+          </button>
+          <div id="mp-preference-result" class="preference-result" style="display:none"></div>
+        </div>
+      </div>
+
+      <!-- PayPal panel -->
+      <div class="gateway-panel" id="panel-paypal">
+        <div class="form-section">
+          <div class="form-title">💰 PayPal Business</div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Client ID</label>
+              <input type="text" id="pp-client-id" placeholder="AXxx..." />
+            </div>
+            <div class="form-group">
+              <label>Client Secret</label>
+              <input type="password" id="pp-client-secret" placeholder="Exxxx..." />
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Entorno</label>
+              <select id="pp-env">
+                <option value="sandbox">Sandbox (pruebas)</option>
+                <option value="live">Live (producción)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Moneda</label>
+              <select id="pp-currency">
+                <option value="USD">USD</option>
+                <option value="EUR">EUR</option>
+                <option value="ARS">ARS</option>
+              </select>
+            </div>
+          </div>
+          <div id="paypal-button-container" style="margin-top:1rem;max-width:300px"></div>
+          <script src="https://www.paypal.com/sdk/js?client-id=sb&currency=USD" defer></script>
+          <button class="btn-primary" id="btn-save-paypal" style="margin-top:12px">
+            <i class="ti ti-device-floppy"></i> Guardar PayPal
+          </button>
+        </div>
+      </div>
+
+      <!-- Stripe panel -->
+      <div class="gateway-panel" id="panel-stripe">
+        <div class="form-section">
+          <div class="form-title">💳 Stripe</div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Publishable Key</label>
+              <input type="text" id="stripe-pub-key" placeholder="pk_test_..." />
+            </div>
+            <div class="form-group">
+              <label>Secret Key</label>
+              <input type="password" id="stripe-secret-key" placeholder="sk_test_..." />
+            </div>
+          </div>
+          <div class="form-group" style="margin-bottom:12px">
+            <label>Webhook Secret</label>
+            <input type="password" id="stripe-webhook-secret" placeholder="whsec_..." />
+          </div>
+          <div id="stripe-elements-container" class="stripe-card-element"></div>
+          <button class="btn-primary" id="btn-save-stripe" style="margin-top:12px">
+            <i class="ti ti-device-floppy"></i> Guardar Stripe
+          </button>
+        </div>
+      </div>
+
+      <!-- Cripto panel -->
+      <div class="gateway-panel" id="panel-crypto">
+        <div class="form-section">
+          <div class="form-title">₿ Pagos con Criptomonedas</div>
+          <p class="panel-desc">Aceptá Bitcoin, Ethereum, USDT y más. Liquidación inmediata a ARS.</p>
+          <div class="crypto-networks">
+            <div class="crypto-item">
+              <div class="crypto-icon">₿</div>
+              <div class="crypto-info">
+                <div class="crypto-name">Bitcoin (BTC)</div>
+                <div class="form-group" style="margin-top:4px">
+                  <input type="text" placeholder="bc1q... dirección BTC" id="crypto-btc" />
+                </div>
+              </div>
+              <label class="toggle"><input type="checkbox" id="crypto-btc-toggle" /><span class="slider-t"></span></label>
+            </div>
+            <div class="crypto-item">
+              <div class="crypto-icon">Ξ</div>
+              <div class="crypto-info">
+                <div class="crypto-name">Ethereum (ETH)</div>
+                <div class="form-group" style="margin-top:4px">
+                  <input type="text" placeholder="0x... dirección ETH" id="crypto-eth" />
+                </div>
+              </div>
+              <label class="toggle"><input type="checkbox" id="crypto-eth-toggle" /><span class="slider-t"></span></label>
+            </div>
+            <div class="crypto-item">
+              <div class="crypto-icon">₮</div>
+              <div class="crypto-info">
+                <div class="crypto-name">USDT (Tether)</div>
+                <div class="form-group" style="margin-top:4px">
+                  <input type="text" placeholder="TRC20 o ERC20 dirección" id="crypto-usdt" />
+                </div>
+              </div>
+              <label class="toggle"><input type="checkbox" id="crypto-usdt-toggle" checked /><span class="slider-t"></span></label>
+            </div>
+          </div>
+          <div class="form-group" style="margin-top:12px">
+            <label>API Key NOWPayments (opcional)</label>
+            <input type="password" id="nowpay-key" placeholder="Integración automática de cripto" />
+            <span class="field-hint">Para confirmación automática de pagos cripto</span>
+          </div>
+          <button class="btn-primary" id="btn-save-crypto">
+            <i class="ti ti-device-floppy"></i> Guardar billeteras
+          </button>
+        </div>
+      </div>
+
+      <!-- Transferencia panel -->
+      <div class="gateway-panel" id="panel-transferencia">
+        <div class="form-section">
+          <div class="form-title">🏦 Datos bancarios / CBU / CVU / Alias</div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Nombre del titular</label>
+              <input type="text" id="bank-name" placeholder="Juan Pérez" />
+            </div>
+            <div class="form-group">
+              <label>CUIT/CUIL</label>
+              <input type="text" id="bank-cuit" placeholder="20-12345678-9" />
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>CBU</label>
+              <div class="input-with-action">
+                <input type="text" id="bank-cbu" placeholder="22 dígitos" maxlength="22" />
+                <button class="btn-icon" onclick="copyField('bank-cbu')"><i class="ti ti-copy"></i></button>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Alias</label>
+              <div class="input-with-action">
+                <input type="text" id="bank-alias" placeholder="MI.ALIAS.BANCO" />
+                <button class="btn-icon" onclick="copyField('bank-alias')"><i class="ti ti-copy"></i></button>
+              </div>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>CVU (Mercado Pago / Ualá)</label>
+              <div class="input-with-action">
+                <input type="text" id="bank-cvu" placeholder="22 dígitos CVU" />
+                <button class="btn-icon" onclick="copyField('bank-cvu')"><i class="ti ti-copy"></i></button>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Banco</label>
+              <select id="bank-name-sel">
+                <option value="">Seleccionar banco</option>
+                <option>Banco Nación</option>
+                <option>Banco Galicia</option>
+                <option>Banco Santander</option>
+                <option>Banco BBVA</option>
+                <option>Mercado Pago</option>
+                <option>Naranja X</option>
+                <option>Ualá</option>
+                <option>Brubank</option>
+                <option>Otro</option>
+              </select>
+            </div>
+          </div>
+          <button class="btn-primary" id="btn-save-transfer">
+            <i class="ti ti-device-floppy"></i> Guardar datos bancarios
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== CARRITO ABANDONADO ===== -->
+    <section class="section" id="section-carrito">
+      <div class="section-header">
+        <h2 class="section-title">Carrito abandonado</h2>
+        <div class="section-actions">
+          <span class="badge-stat">
+            <i class="ti ti-shopping-cart-x"></i> <strong id="abandoned-count">4</strong> pendientes
+          </span>
+          <button class="btn-primary btn-sm" id="btn-save-carrito">
+            <i class="ti ti-device-floppy"></i> Guardar secuencia
+          </button>
+        </div>
+      </div>
+
+      <!-- KPIs recuperación -->
+      <div class="kpi-grid kpi-compact">
+        <div class="kpi-card">
+          <div class="kpi-icon icon-amber"><i class="ti ti-shopping-cart-x"></i></div>
+          <div class="kpi-body">
+            <div class="kpi-value amber" id="cart-total-abandoned">4</div>
+            <div class="kpi-label">Carritos abandonados</div>
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-icon icon-green"><i class="ti ti-check"></i></div>
+          <div class="kpi-body">
+            <div class="kpi-value green" id="cart-total-recovered">1</div>
+            <div class="kpi-label">Recuperados</div>
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-icon icon-blue"><i class="ti ti-send"></i></div>
+          <div class="kpi-body">
+            <div class="kpi-value" id="cart-reminders-sent">7</div>
+            <div class="kpi-label">Recordatorios enviados</div>
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-icon icon-green"><i class="ti ti-cash"></i></div>
+          <div class="kpi-body">
+            <div class="kpi-value green" id="cart-recovered-amount">$22.000</div>
+            <div class="kpi-label">Monto recuperado</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid-2col">
+        <!-- Secuencia de recordatorios -->
+        <div class="form-section">
+          <div class="form-title"><i class="ti ti-send"></i> Secuencia de recuperación</div>
+
+          <div class="reminder-sequence">
+            <div class="reminder-step active-step" id="step-1">
+              <div class="step-number">1</div>
+              <div class="step-content">
+                <div class="step-header">
+                  <div>
+                    <div class="step-title">Recordatorio 1 — 1 hora</div>
+                    <div class="step-sub">Email con link directo al carrito</div>
+                  </div>
+                  <label class="toggle"><input type="checkbox" id="rem-1" checked /><span class="slider-t"></span></label>
+                </div>
+                <textarea class="msg-template" id="rem-1-msg">¡Hola {{nombre}}! 👋 Olvidaste algo en tu carrito.
+Tenés {{producto}} esperándote por ${{precio}}.
+Completá tu compra acá: {{link}}</textarea>
+                <div class="step-channels">
+                  <label><input type="checkbox" checked /> Email</label>
+                  <label><input type="checkbox" checked /> Instagram DM</label>
+                  <label><input type="checkbox" /> WhatsApp</label>
+                </div>
+              </div>
+            </div>
+
+            <div class="step-connector"><i class="ti ti-arrow-down"></i></div>
+
+            <div class="reminder-step" id="step-2">
+              <div class="step-number">2</div>
+              <div class="step-content">
+                <div class="step-header">
+                  <div>
+                    <div class="step-title">Recordatorio 2 — 24 horas</div>
+                    <div class="step-sub">Con descuento especial automático</div>
+                  </div>
+                  <label class="toggle"><input type="checkbox" id="rem-2" checked /><span class="slider-t"></span></label>
+                </div>
+                <textarea class="msg-template" id="rem-2-msg">{{nombre}}, ¡tu carrito sigue esperándote! 🎁
+Tenemos un descuento especial del {{descuento}}% para vos.
+Usá el código {{codigo}} al finalizar la compra.
+Válido por 24hs: {{link}}</textarea>
+                <div class="step-channels">
+                  <label><input type="checkbox" checked /> Email</label>
+                  <label><input type="checkbox" checked /> Instagram DM</label>
+                  <label><input type="checkbox" checked /> WhatsApp</label>
+                </div>
+              </div>
+            </div>
+
+            <div class="step-connector"><i class="ti ti-arrow-down"></i></div>
+
+            <div class="reminder-step" id="step-3">
+              <div class="step-number">3</div>
+              <div class="step-content">
+                <div class="step-header">
+                  <div>
+                    <div class="step-title">Recordatorio 3 — 48 horas</div>
+                    <div class="step-sub">Último llamado + urgencia</div>
+                  </div>
+                  <label class="toggle"><input type="checkbox" id="rem-3" /><span class="slider-t"></span></label>
+                </div>
+                <textarea class="msg-template" id="rem-3-msg">{{nombre}}, ¡último llamado! ⏰
+Tu descuento del {{descuento}}% vence HOY.
+No te pierdas {{producto}} al mejor precio.
+Comprá ahora: {{link}}</textarea>
+                <div class="step-channels">
+                  <label><input type="checkbox" /> Email</label>
+                  <label><input type="checkbox" /> Instagram DM</label>
+                  <label><input type="checkbox" checked /> WhatsApp</label>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Config descuento -->
+        <div>
+          <div class="form-section">
+            <div class="form-title"><i class="ti ti-discount"></i> Descuento automático</div>
+            <div class="toggle-row">
+              <div><div class="toggle-label">Activar descuento en recuperación</div><div class="toggle-sub">Se aplica desde el 2° recordatorio</div></div>
+              <label class="toggle"><input type="checkbox" id="discount-toggle" checked /><span class="slider-t"></span></label>
+            </div>
+            <div class="form-row" style="margin-top:12px">
+              <div class="form-group">
+                <label>% de descuento</label>
+                <input type="number" id="discount-pct" value="10" min="1" max="50" />
+              </div>
+              <div class="form-group">
+                <label>Validez del cupón (hs)</label>
+                <input type="number" id="coupon-hours" value="24" min="1" max="168" />
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Prefijo del código</label>
+              <input type="text" id="coupon-prefix" value="VUELVE" placeholder="VUELVE, DESCUENTO, etc." />
+              <span class="field-hint">Se generará: VUELVE-XXXXXX</span>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <div class="form-title"><i class="ti ti-settings"></i> Configuración avanzada</div>
+            <div class="toggle-row">
+              <div><div class="toggle-label">Detectar carrito vía Pixel</div><div class="toggle-sub">AddToCart + sin Purchase</div></div>
+              <label class="toggle"><input type="checkbox" checked /><span class="slider-t"></span></label>
+            </div>
+            <div class="toggle-row">
+              <div><div class="toggle-label">Respetar horario comercial</div><div class="toggle-sub">No enviar entre 23:00 y 08:00</div></div>
+              <label class="toggle"><input type="checkbox" checked /><span class="slider-t"></span></label>
+            </div>
+            <div class="toggle-row">
+              <div><div class="toggle-label">Parar al comprar</div><div class="toggle-sub">Cancelar secuencia si completa compra</div></div>
+              <label class="toggle"><input type="checkbox" checked /><span class="slider-t"></span></label>
+            </div>
+            <div class="form-row" style="margin-top:12px">
+              <div class="form-group">
+                <label>Monto mínimo carrito (ARS)</label>
+                <input type="number" id="min-cart-amount" value="1000" />
+              </div>
+              <div class="form-group">
+                <label>Días máx. sin acción</label>
+                <input type="number" id="max-days-inactive" value="7" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Lista de carritos -->
+      <div class="form-section">
+        <div class="cart-list-header">
+          <div class="form-title" style="margin-bottom:0"><i class="ti ti-list"></i> Carritos abandonados</div>
+          <div class="cart-filters">
+            <button class="filter-btn active" data-filter="all">Todos</button>
+            <button class="filter-btn" data-filter="pending">Pendientes</button>
+            <button class="filter-btn" data-filter="recovered">Recuperados</button>
+            <button class="filter-btn" data-filter="expired">Expirados</button>
+          </div>
+        </div>
+        <div class="cart-table" id="cart-table">
+          <!-- Generado por JS -->
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== AUTO-VENTAS ===== -->
+    <section class="section" id="section-ventas">
+      <div class="section-header">
+        <h2 class="section-title">Sistema auto-ventas</h2>
+        <div class="section-actions">
+          <span class="bot-status-indicator" id="bot-global-status">
+            <span class="live-dot"></span> Bot activo
+          </span>
+          <button class="btn-primary btn-sm" id="btn-save-bot">
+            <i class="ti ti-device-floppy"></i> Guardar bot
+          </button>
+        </div>
+      </div>
+
+      <!-- KPIs bot -->
+      <div class="kpi-grid kpi-compact">
+        <div class="kpi-card">
+          <div class="kpi-icon icon-green"><i class="ti ti-message-circle"></i></div>
+          <div class="kpi-body">
+            <div class="kpi-value green" id="bot-response-rate">98%</div>
+            <div class="kpi-label">Tasa respuesta</div>
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-icon icon-blue"><i class="ti ti-clock"></i></div>
+          <div class="kpi-body">
+            <div class="kpi-value" id="bot-response-time">1.4s</div>
+            <div class="kpi-label">Tiempo respuesta</div>
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-icon icon-amber"><i class="ti ti-messages"></i></div>
+          <div class="kpi-body">
+            <div class="kpi-value amber" id="bot-chats-today">34</div>
+            <div class="kpi-label">Chats hoy</div>
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-icon icon-green"><i class="ti ti-shopping-bag"></i></div>
+          <div class="kpi-body">
+            <div class="kpi-value green" id="bot-conversions">12</div>
+            <div class="kpi-label">Conversiones</div>
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-icon icon-red"><i class="ti ti-brand-instagram"></i></div>
+          <div class="kpi-body">
+            <div class="kpi-value red" id="bot-ig-chats">21</div>
+            <div class="kpi-label">DMs Instagram</div>
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-icon icon-green"><i class="ti ti-brand-whatsapp"></i></div>
+          <div class="kpi-body">
+            <div class="kpi-value" style="color:#25D366" id="bot-wa-chats">13</div>
+            <div class="kpi-label">Chats WhatsApp</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid-2col">
+        <!-- Config bot -->
+        <div>
+          <div class="form-section">
+            <div class="form-title"><i class="ti ti-robot"></i> Canales activos</div>
+            <div class="toggle-row">
+              <div>
+                <div class="toggle-label"><i class="ti ti-brand-instagram" style="color:#E4405F"></i> Instagram DMs</div>
+                <div class="toggle-sub">Responde consultas en mensajes directos</div>
+              </div>
+              <label class="toggle"><input type="checkbox" id="ch-instagram" checked /><span class="slider-t"></span></label>
+            </div>
+            <div class="toggle-row">
+              <div>
+                <div class="toggle-label"><i class="ti ti-brand-whatsapp" style="color:#25D366"></i> WhatsApp Business</div>
+                <div class="toggle-sub">Cotizaciones y catálogo automático</div>
+              </div>
+              <label class="toggle"><input type="checkbox" id="ch-whatsapp" checked /><span class="slider-t"></span></label>
+            </div>
+            <div class="toggle-row">
+              <div>
+                <div class="toggle-label"><i class="ti ti-brand-facebook" style="color:#1877F2"></i> Facebook Messenger</div>
+                <div class="toggle-sub">Responde mensajes en tu fanpage</div>
+              </div>
+              <label class="toggle"><input type="checkbox" id="ch-facebook" /><span class="slider-t"></span></label>
+            </div>
+            <div class="toggle-row">
+              <div>
+                <div class="toggle-label"><i class="ti ti-brand-telegram" style="color:#0088cc"></i> Telegram</div>
+                <div class="toggle-sub">Bot de Telegram (opcional)</div>
+              </div>
+              <label class="toggle"><input type="checkbox" id="ch-telegram" /><span class="slider-t"></span></label>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <div class="form-title"><i class="ti ti-moon"></i> Horario y modo nocturno</div>
+            <div class="toggle-row">
+              <div><div class="toggle-label">Modo nocturno activo</div><div class="toggle-sub">Bot responde de 22:00 a 08:00</div></div>
+              <label class="toggle"><input type="checkbox" id="night-mode" checked /><span class="slider-t"></span></label>
+            </div>
+            <div class="form-row" style="margin-top:12px">
+              <div class="form-group">
+                <label>Inicio modo nocturno</label>
+                <input type="time" id="night-start" value="22:00" />
+              </div>
+              <div class="form-group">
+                <label>Fin modo nocturno</label>
+                <input type="time" id="night-end" value="08:00" />
+              </div>
+            </div>
+            <div class="toggle-row">
+              <div><div class="toggle-label">Follow-up post-compra</div><div class="toggle-sub">Pide reseña 3 días después</div></div>
+              <label class="toggle"><input type="checkbox" id="followup-toggle" /><span class="slider-t"></span></label>
+            </div>
+            <div class="toggle-row">
+              <div><div class="toggle-label">Respuesta con IA (GPT)</div><div class="toggle-sub">Respuestas inteligentes contextuales</div></div>
+              <label class="toggle"><input type="checkbox" id="ai-mode" /><span class="slider-t"></span></label>
+            </div>
+            <div class="form-group" id="ai-key-field" style="margin-top:8px;display:none">
+              <label>OpenAI API Key</label>
+              <input type="password" id="openai-key" placeholder="sk-..." />
+            </div>
+          </div>
+
+          <!-- Credenciales Instagram -->
+          <div class="form-section">
+            <div class="form-title"><i class="ti ti-brand-instagram"></i> Credenciales Instagram Graph API</div>
+            <div class="form-group" style="margin-bottom:10px">
+              <label>Page Access Token (Meta)</label>
+              <input type="password" id="ig-token" placeholder="EAA..." />
+              <span class="field-hint">Desde Meta Business Suite → Configuración → Acceso a páginas</span>
+            </div>
+            <div class="form-group" style="margin-bottom:10px">
+              <label>Instagram Account ID</label>
+              <input type="text" id="ig-account-id" placeholder="17841xxxxxxxxx" />
+            </div>
+            <div class="form-group">
+              <label>Webhook Verify Token</label>
+              <input type="text" id="ig-webhook-verify" placeholder="mi_token_secreto_123" />
+            </div>
+          </div>
+
+          <!-- WhatsApp config -->
+          <div class="form-section">
+            <div class="form-title"><i class="ti ti-brand-whatsapp"></i> WhatsApp Business API</div>
+            <div class="form-group" style="margin-bottom:10px">
+              <label>Phone Number ID</label>
+              <input type="text" id="wa-phone-id" placeholder="1234567890" />
+            </div>
+            <div class="form-group" style="margin-bottom:10px">
+              <label>Access Token (WhatsApp API)</label>
+              <input type="password" id="wa-token" placeholder="EAA..." />
+            </div>
+            <div class="form-group">
+              <label>Número de WhatsApp Business</label>
+              <input type="tel" id="wa-number" placeholder="+54 9 11 xxxx-xxxx" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Mensajes del bot -->
+        <div>
+          <div class="form-section">
+            <div class="form-title"><i class="ti ti-message"></i> Mensajes del bot</div>
+
+            <div class="msg-tabs">
+              <button class="msg-tab active" data-msg="welcome">Bienvenida</button>
+              <button class="msg-tab" data-msg="catalog">Catálogo</button>
+              <button class="msg-tab" data-msg="price">Precios</button>
+              <button class="msg-tab" data-msg="payment">Pago</button>
+              <button class="msg-tab" data-msg="followup">Post-venta</button>
+            </div>
+
+            <div class="msg-panel active" id="msg-welcome">
+              <label class="msg-label">Mensaje de bienvenida (primera vez)</label>
+              <textarea class="msg-template tall" id="welcome-msg">¡Hola {{nombre}}! 👋 Gracias por escribirnos a {{tienda}}.
+Somos tu tienda online favorita 🛍️
+
+¿En qué te podemos ayudar?
+1️⃣ Ver catálogo
+2️⃣ Precios y stock
+3️⃣ Formas de pago
+4️⃣ Estado de mi pedido</textarea>
+              <div class="msg-vars">
+                <span class="var-tag" onclick="insertVar('welcome-msg', '{{nombre}}')">{{nombre}}</span>
+                <span class="var-tag" onclick="insertVar('welcome-msg', '{{tienda}}')">{{tienda}}</span>
+              </div>
+            </div>
+
+            <div class="msg-panel" id="msg-catalog">
+              <label class="msg-label">Respuesta de catálogo</label>
+              <textarea class="msg-template tall" id="catalog-msg">¡Claro! Te comparto nuestro catálogo completo 📦
+
+🛍️ Ver todo: {{link_catalogo}}
+📸 Instagram: {{ig_handle}}
+
+¿Querés info de algún producto en particular?</textarea>
+              <div class="msg-vars">
+                <span class="var-tag" onclick="insertVar('catalog-msg', '{{link_catalogo}}')">{{link_catalogo}}</span>
+                <span class="var-tag" onclick="insertVar('catalog-msg', '{{ig_handle}}')">{{ig_handle}}</span>
+              </div>
+            </div>
+
+            <div class="msg-panel" id="msg-price">
+              <label class="msg-label">Respuesta de precios</label>
+              <textarea class="msg-template tall" id="price-msg">Los precios están actualizados en nuestro sitio 💰
+
+🔗 Ver precios: {{link_precios}}
+💳 Aceptamos: Tarjeta, transferencia y efectivo
+📦 Envíos a todo el país
+
+¿Te interesa algún producto específico?</textarea>
+            </div>
+
+            <div class="msg-panel" id="msg-payment">
+              <label class="msg-label">Respuesta métodos de pago</label>
+              <textarea class="msg-template tall" id="payment-msg">Aceptamos todos los métodos de pago 💳
+
+✅ Tarjeta (débito/crédito)
+✅ Transferencia CBU/CVU
+✅ Mercado Pago
+✅ Efectivo (Rapipago)
+📅 Cuotas sin interés disponibles
+
+¿Querés que te envíe el link de pago?</textarea>
+            </div>
+
+            <div class="msg-panel" id="msg-followup">
+              <label class="msg-label">Follow-up post-compra (3 días)</label>
+              <textarea class="msg-template tall" id="followup-msg">¡Hola {{nombre}}! 😊
+Ya deberías tener tu pedido {{producto}}.
+
+¿Llegó todo bien? Nos encantaría saber tu experiencia.
+Dejanos tu reseña: {{link_resena}} ⭐
+
+¡Gracias por confiar en nosotros!</textarea>
+            </div>
+          </div>
+
+          <!-- Respuestas rápidas -->
+          <div class="form-section">
+            <div class="form-title"><i class="ti ti-bolt"></i> Palabras clave → respuestas</div>
+            <div id="keywords-list">
+              <!-- Generado por JS -->
+            </div>
+            <button class="btn-outline btn-sm" id="btn-add-keyword" style="margin-top:10px">
+              <i class="ti ti-plus"></i> Agregar palabra clave
+            </button>
+          </div>
+
+          <!-- Simulador chat -->
+          <div class="form-section">
+            <div class="form-title"><i class="ti ti-device-mobile"></i> Simular conversación</div>
+            <div class="chat-preview" id="chat-preview">
+              <div class="chat-bubble bot">¡Hola! Soy el bot de ventas 🤖</div>
+            </div>
+            <div class="chat-input-row">
+              <input type="text" id="chat-sim-input" placeholder="Escribí un mensaje de prueba..." />
+              <button class="btn-primary" onclick="simulateChat()"><i class="ti ti-send"></i></button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Historial de conversaciones -->
+      <div class="form-section">
+        <div class="cart-list-header">
+          <div class="form-title" style="margin-bottom:0"><i class="ti ti-messages"></i> Historial de conversaciones</div>
+          <div class="cart-filters" id="history-filters">
+            <button class="filter-btn active" data-hfilter="all">Todas</button>
+            <button class="filter-btn" data-hfilter="instagram">Instagram</button>
+            <button class="filter-btn" data-hfilter="whatsapp">WhatsApp</button>
+            <button class="filter-btn" data-hfilter="facebook">Facebook</button>
+          </div>
+        </div>
+        <div class="history-list" id="bot-history-list">
+          <!-- generado por JS -->
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== PIXEL ===== -->
+    <section class="section" id="section-pixel">
+      <div class="section-header">
+        <h2 class="section-title">Pixel publicitario</h2>
+        <div class="section-actions">
+          <button class="btn-primary btn-sm" id="btn-save-pixel">
+            <i class="ti ti-device-floppy"></i> Guardar pixels
+          </button>
+        </div>
+      </div>
+
+      <!-- KPIs pixel -->
+      <div class="kpi-grid kpi-compact">
+        <div class="kpi-card">
+          <div class="kpi-icon icon-blue"><i class="ti ti-eye"></i></div>
+          <div class="kpi-body">
+            <div class="kpi-value" id="px-pageview">847</div>
+            <div class="kpi-label">PageView</div>
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-icon icon-amber"><i class="ti ti-shopping-cart"></i></div>
+          <div class="kpi-body">
+            <div class="kpi-value amber" id="px-addtocart">124</div>
+            <div class="kpi-label">AddToCart</div>
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-icon icon-green"><i class="ti ti-check"></i></div>
+          <div class="kpi-body">
+            <div class="kpi-value green" id="px-purchase">38</div>
+            <div class="kpi-label">Purchase</div>
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-icon icon-purple"><i class="ti ti-chart-pie"></i></div>
+          <div class="kpi-body">
+            <div class="kpi-value purple" id="px-conv-rate">4.5%</div>
+            <div class="kpi-label">Conv. rate</div>
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-icon icon-red"><i class="ti ti-search"></i></div>
+          <div class="kpi-body">
+            <div class="kpi-value red" id="px-viewcontent">312</div>
+            <div class="kpi-label">ViewContent</div>
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-icon icon-blue"><i class="ti ti-users"></i></div>
+          <div class="kpi-body">
+            <div class="kpi-value" id="px-lead">47</div>
+            <div class="kpi-label">Lead</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="pixel-grid">
+        <!-- Facebook Pixel -->
+        <div class="pixel-card">
+          <div class="pixel-header">
+            <div class="pixel-logo-badge fb-badge">f</div>
+            <div>
+              <div class="pixel-name">Facebook Pixel</div>
+              <div class="pixel-sub">Meta Ads · Conversiones</div>
+            </div>
+            <div class="pixel-status" id="fb-pixel-status">
+              <span class="status-dot dot-off"></span> Inactivo
+            </div>
+          </div>
+
+          <div class="form-group" style="margin-bottom:12px">
+            <label>ID del Pixel <span class="required">*</span></label>
+            <input type="text" id="fb-pixel-id" placeholder="123456789012345" maxlength="15" />
+          </div>
+
+          <div class="form-group" style="margin-bottom:12px">
+            <label>Access Token (para CAPI)</label>
+            <input type="password" id="fb-capi-token" placeholder="Conversions API token" />
+            <span class="field-hint">Mejora el tracking con iOS 14+</span>
+          </div>
+
+          <div class="pixel-events-section">
+            <div class="events-title">Eventos a rastrear</div>
+            <div class="events-grid">
+              <label class="event-toggle">
+                <input type="checkbox" id="fb-ev-pageview" checked />
+                <span class="event-name">PageView</span>
+                <span class="event-desc">Cada visita</span>
+              </label>
+              <label class="event-toggle">
+                <input type="checkbox" id="fb-ev-viewcontent" checked />
+                <span class="event-name">ViewContent</span>
+                <span class="event-desc">Ver producto</span>
+              </label>
+              <label class="event-toggle">
+                <input type="checkbox" id="fb-ev-addtocart" checked />
+                <span class="event-name">AddToCart</span>
+                <span class="event-desc">Agregar carrito</span>
+              </label>
+              <label class="event-toggle">
+                <input type="checkbox" id="fb-ev-initcheckout" checked />
+                <span class="event-name">InitiateCheckout</span>
+                <span class="event-desc">Iniciar pago</span>
+              </label>
+              <label class="event-toggle">
+                <input type="checkbox" id="fb-ev-purchase" checked />
+                <span class="event-name">Purchase</span>
+                <span class="event-desc">Compra completa</span>
+              </label>
+              <label class="event-toggle">
+                <input type="checkbox" id="fb-ev-lead" />
+                <span class="event-name">Lead</span>
+                <span class="event-desc">Formulario enviado</span>
+              </label>
+              <label class="event-toggle">
+                <input type="checkbox" id="fb-ev-contact" />
+                <span class="event-name">Contact</span>
+                <span class="event-desc">Mensaje enviado</span>
+              </label>
+              <label class="event-toggle">
+                <input type="checkbox" id="fb-ev-schedule" />
+                <span class="event-name">Schedule</span>
+                <span class="event-desc">Turno agendado</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="code-preview">
+            <div class="code-header">
+              Código generado <button class="btn-copy-code" onclick="copyPixelCode('fb')"><i class="ti ti-copy"></i> Copiar</button>
+            </div>
+            <pre class="code-box" id="fb-code-preview">// Ingresá tu Pixel ID para generar el código</pre>
+          </div>
+
+          <div class="pixel-card-actions">
+            <button class="btn-outline btn-sm" onclick="testPixelEvent('fb', 'PageView')">
+              <i class="ti ti-test-pipe"></i> Probar PageView
+            </button>
+            <button class="btn-primary" id="btn-activate-fb">
+              <i class="ti ti-check"></i> Activar pixel
+            </button>
+          </div>
+        </div>
+
+        <!-- Instagram / Meta Pixel -->
+        <div class="pixel-card">
+          <div class="pixel-header">
+            <div class="pixel-logo-badge ig-badge">▣</div>
+            <div>
+              <div class="pixel-name">Instagram Pixel</div>
+              <div class="pixel-sub">Meta Ads · Mismo pixel que Facebook</div>
+            </div>
+            <div class="pixel-status" id="ig-pixel-status">
+              <span class="status-dot dot-off"></span> Inactivo
+            </div>
+          </div>
+
+          <div class="info-box">
+            <i class="ti ti-info-circle"></i>
+            Instagram usa el mismo Pixel que Facebook (Meta Pixel). Una vez configurado el FB Pixel, automáticamente trackea en Instagram.
+          </div>
+
+          <div class="form-group" style="margin-bottom:12px">
+            <label>Dataset ID (Conversions API)</label>
+            <input type="text" id="ig-dataset-id" placeholder="Mismo que Facebook Pixel ID" />
+          </div>
+
+          <div class="pixel-events-section">
+            <div class="events-title">Funciones adicionales Instagram</div>
+            <div class="events-grid">
+              <label class="event-toggle">
+                <input type="checkbox" id="ig-stories" checked />
+                <span class="event-name">Rastreo Stories</span>
+                <span class="event-desc">Clicks desde stories</span>
+              </label>
+              <label class="event-toggle">
+                <input type="checkbox" id="ig-shopping" checked />
+                <span class="event-name">Instagram Shopping</span>
+                <span class="event-desc">Compras en app</span>
+              </label>
+              <label class="event-toggle">
+                <input type="checkbox" id="ig-capi" />
+                <span class="event-name">Conversions API</span>
+                <span class="event-desc">Server-side tracking</span>
+              </label>
+              <label class="event-toggle">
+                <input type="checkbox" id="ig-lookalike" />
+                <span class="event-name">Lookalike Audience</span>
+                <span class="event-desc">Audiencias similares</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="pixel-events-section" style="margin-top:1rem">
+            <div class="events-title">Audiencias personalizadas</div>
+            <div class="audience-list" id="audience-list">
+              <div class="audience-item">
+                <div class="audience-name">Visitantes 30 días</div>
+                <div class="audience-size">~1,240 personas</div>
+                <span class="badge-on">Activa</span>
+              </div>
+              <div class="audience-item">
+                <div class="audience-name">Compradores 60 días</div>
+                <div class="audience-size">~380 personas</div>
+                <span class="badge-on">Activa</span>
+              </div>
+              <div class="audience-item">
+                <div class="audience-name">Carrito abandonado</div>
+                <div class="audience-size">~240 personas</div>
+                <span class="badge-warn">Configurando</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="code-preview">
+            <div class="code-header">
+              Config CAPI <button class="btn-copy-code" onclick="copyPixelCode('ig')"><i class="ti ti-copy"></i> Copiar</button>
+            </div>
+            <pre class="code-box" id="ig-code-preview">// Instagram Pixel se configura junto a Facebook
+// Usá el mismo Pixel ID del panel de Facebook</pre>
+          </div>
+
+          <div class="pixel-card-actions">
+            <button class="btn-outline btn-sm" onclick="openMetaBusiness()">
+              <i class="ti ti-external-link"></i> Meta Business
+            </button>
+            <button class="btn-primary" id="btn-activate-ig">
+              <i class="ti ti-check"></i> Activar pixel
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Log de eventos en tiempo real -->
+      <div class="form-section">
+        <div class="form-title"><i class="ti ti-activity"></i> Log de eventos en tiempo real</div>
+        <div class="events-log" id="pixel-events-log">
+          <!-- Generado por JS -->
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== AUDITORÍA ===== -->
+    <section class="section" id="section-auditoria">
+      <div class="audit-banner">
+        <div class="audit-banner-content">
+          <div>
+            <div class="audit-title">Auditoría <span class="accent">Gratuita</span></div>
+            <div class="audit-sub">Diagnóstico completo de tu negocio digital — 100% gratis</div>
+          </div>
+          <div class="audit-score-circle" id="audit-score-circle">
+            <svg viewBox="0 0 80 80">
+              <circle cx="40" cy="40" r="34" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="6"/>
+              <circle cx="40" cy="40" r="34" fill="none" stroke="#e94560" stroke-width="6"
+                stroke-dasharray="213.6" stroke-dashoffset="128.16" stroke-linecap="round"
+                transform="rotate(-90 40 40)" id="audit-score-arc"/>
+            </svg>
+            <div class="audit-score-num" id="audit-score-num">40%</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Formulario diagnóstico -->
+      <div class="form-section">
+        <div class="form-title"><i class="ti ti-building-store"></i> Datos de tu negocio</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Nombre del negocio <span class="required">*</span></label>
+            <input type="text" id="audit-biz-name" placeholder="Mi tienda online" />
+          </div>
+          <div class="form-group">
+            <label>Rubro / categoría</label>
+            <select id="audit-category">
+              <option value="">Seleccionar...</option>
+              <option>Moda y ropa</option>
+              <option>Electrónica</option>
+              <option>Alimentos y bebidas</option>
+              <option>Belleza y cosméticos</option>
+              <option>Hogar y decoración</option>
+              <option>Deportes</option>
+              <option>Servicios</option>
+              <option>Otro</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Instagram / web</label>
+            <input type="text" id="audit-ig" placeholder="@mitienda o www.mitienda.com" />
+          </div>
+          <div class="form-group">
+            <label>Ventas mensuales aprox.</label>
+            <select id="audit-revenue">
+              <option value="low">Menos de $100.000</option>
+              <option value="mid">$100k — $500k</option>
+              <option value="high">$500k — $2M</option>
+              <option value="top">Más de $2M</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group" style="margin-bottom:12px">
+          <label>¿Cuál es tu mayor problema hoy?</label>
+          <textarea class="msg-template" id="audit-problem" placeholder="Ej: Tengo muchos seguidores pero pocas ventas. No sé por qué la gente no termina de comprar..."></textarea>
+        </div>
+        <div class="form-group" style="margin-bottom:12px">
+          <label>¿Qué herramientas usás actualmente?</label>
+          <div class="tools-check-grid">
+            <label class="tool-check"><input type="checkbox" /> Mercado Shops</label>
+            <label class="tool-check"><input type="checkbox" /> Tienda Nube</label>
+            <label class="tool-check"><input type="checkbox" /> WooCommerce</label>
+            <label class="tool-check"><input type="checkbox" /> Shopify</label>
+            <label class="tool-check"><input type="checkbox" /> Instagram Shopping</label>
+            <label class="tool-check"><input type="checkbox" /> WhatsApp Business</label>
+            <label class="tool-check"><input type="checkbox" /> Meta Ads</label>
+            <label class="tool-check"><input type="checkbox" /> Google Ads</label>
+          </div>
+        </div>
+        <button class="btn-primary" id="btn-run-audit">
+          <i class="ti ti-send"></i> Analizar mi negocio
+        </button>
+      </div>
+
+      <!-- Checklist del sistema -->
+      <div class="form-section">
+        <div class="form-title"><i class="ti ti-list-check"></i> Checklist de implementación</div>
+        <div class="audit-progress-bar">
+          <div class="audit-progress-fill" id="audit-progress" style="width:40%"></div>
+        </div>
+        <p class="audit-progress-label" id="audit-progress-label">2 de 5 módulos configurados</p>
+        <div class="checklist" id="checklist-items">
+          <!-- Generado por JS -->
+        </div>
+      </div>
+
+      <!-- Resultado auditoría -->
+      <div class="audit-result" id="audit-result" style="display:none">
+        <div class="form-title"><i class="ti ti-chart-bar"></i> Resultados del diagnóstico</div>
+        <div id="audit-result-content"></div>
+      </div>
+    </section>
+
+    <!-- ===== EMAIL MARKETING ===== -->
+    <section class="section" id="section-email">
+      <div class="section-header">
+        <h2 class="section-title">Email Marketing</h2>
+        <div class="section-actions">
+          <button class="btn-primary btn-sm" id="btn-save-email">
+            <i class="ti ti-device-floppy"></i> Guardar
+          </button>
+        </div>
+      </div>
+
+      <!-- KPIs email -->
+      <div class="kpi-grid kpi-compact">
+        <div class="kpi-card">
+          <div class="kpi-icon icon-blue"><i class="ti ti-mail"></i></div>
+          <div class="kpi-body">
+            <div class="kpi-value" id="email-subscribers">0</div>
+            <div class="kpi-label">Suscriptores</div>
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-icon icon-green"><i class="ti ti-mail-opened"></i></div>
+          <div class="kpi-body">
+            <div class="kpi-value green" id="email-open-rate">0%</div>
+            <div class="kpi-label">Tasa de apertura</div>
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-icon icon-amber"><i class="ti ti-cursor-text"></i></div>
+          <div class="kpi-body">
+            <div class="kpi-value amber" id="email-click-rate">0%</div>
+            <div class="kpi-label">Tasa de clicks</div>
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-icon icon-red"><i class="ti ti-mail-x"></i></div>
+          <div class="kpi-body">
+            <div class="kpi-value red" id="email-unsub-rate">0%</div>
+            <div class="kpi-label">Bajas</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid-2col">
+        <!-- Config proveedor SMTP -->
+        <div>
+          <div class="form-section">
+            <div class="form-title"><i class="ti ti-server"></i> Proveedor de email</div>
+            <div class="email-provider-tabs" id="email-provider-tabs">
+              <button class="email-prov-tab active" data-prov="smtp">SMTP propio</button>
+              <button class="email-prov-tab" data-prov="sendgrid">SendGrid</button>
+              <button class="email-prov-tab" data-prov="mailchimp">Mailchimp</button>
+              <button class="email-prov-tab" data-prov="brevo">Brevo</button>
+            </div>
+
+            <div class="email-prov-panel active" id="epanel-smtp">
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Host SMTP</label>
+                  <input type="text" id="smtp-host" placeholder="smtp.gmail.com" />
+                </div>
+                <div class="form-group">
+                  <label>Puerto</label>
+                  <input type="number" id="smtp-port" placeholder="587" value="587" />
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Usuario</label>
+                  <input type="text" id="smtp-user" placeholder="tu@email.com" />
+                </div>
+                <div class="form-group">
+                  <label>Contraseña</label>
+                  <input type="password" id="smtp-pass" placeholder="••••••••" />
+                </div>
+              </div>
+              <div class="form-group">
+                <label>Email remitente</label>
+                <input type="email" id="smtp-from" placeholder="ventas@mitienda.com" />
+              </div>
+              <div class="form-group">
+                <label>Nombre remitente</label>
+                <input type="text" id="smtp-from-name" placeholder="Mi Tienda" />
+              </div>
+            </div>
+
+            <div class="email-prov-panel" id="epanel-sendgrid">
+              <div class="form-group">
+                <label>API Key <span class="required">*</span></label>
+                <div class="input-with-action">
+                  <input type="password" id="sendgrid-key" placeholder="SG.xxxxx" />
+                  <button class="btn-icon" onclick="togglePassword('sendgrid-key')"><i class="ti ti-eye"></i></button>
+                </div>
+              </div>
+              <div class="form-group">
+                <label>Email remitente verificado</label>
+                <input type="email" id="sendgrid-from" placeholder="ventas@mitienda.com" />
+              </div>
+            </div>
+
+            <div class="email-prov-panel" id="epanel-mailchimp">
+              <div class="form-group">
+                <label>API Key</label>
+                <input type="password" id="mailchimp-key" placeholder="xxxx-us1" />
+              </div>
+              <div class="form-group">
+                <label>Audience ID (List ID)</label>
+                <input type="text" id="mailchimp-list" placeholder="abc123de" />
+              </div>
+            </div>
+
+            <div class="email-prov-panel" id="epanel-brevo">
+              <div class="form-group">
+                <label>API Key</label>
+                <input type="password" id="brevo-key" placeholder="xkeysib-..." />
+              </div>
+              <div class="form-group">
+                <label>Email remitente</label>
+                <input type="email" id="brevo-from" placeholder="ventas@mitienda.com" />
+              </div>
+            </div>
+
+            <button class="btn-outline btn-sm" id="btn-test-email" style="margin-top:12px">
+              <i class="ti ti-send"></i> Enviar email de prueba
+            </button>
+            <div class="notification" id="email-test-result" style="display:none"></div>
+          </div>
+
+          <!-- Suscriptores -->
+          <div class="form-section">
+            <div class="form-title"><i class="ti ti-users"></i> Lista de suscriptores</div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Agregar suscriptor</label>
+                <div class="input-with-action">
+                  <input type="email" id="new-subscriber-email" placeholder="cliente@email.com" />
+                  <button class="btn-icon" id="btn-add-subscriber"><i class="ti ti-plus"></i></button>
+                </div>
+              </div>
+              <div class="form-group">
+                <label>Importar lista (CSV)</label>
+                <div class="file-upload-area" id="subscribers-upload-area">
+                  <i class="ti ti-upload"></i>
+                  <span>Arrastrá un CSV o hacé click</span>
+                  <input type="file" id="subscribers-csv" accept=".csv" style="display:none" />
+                </div>
+              </div>
+            </div>
+            <div class="subscribers-list" id="subscribers-list">
+              <!-- generado por JS -->
+            </div>
+            <div class="form-actions-row">
+              <span id="subscribers-count" style="font-size:12px;color:var(--color-text-3)">0 suscriptores</span>
+              <button class="btn-outline btn-sm" id="btn-export-subscribers">
+                <i class="ti ti-download"></i> Exportar CSV
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Campañas y flows -->
+        <div>
+          <div class="form-section">
+            <div class="form-title"><i class="ti ti-send"></i> Flows automáticos</div>
+            <div class="flow-list" id="flow-list">
+              <div class="flow-item">
+                <div class="flow-header">
+                  <div class="flow-icon icon-green"><i class="ti ti-user-plus"></i></div>
+                  <div class="flow-info">
+                    <div class="flow-name">Bienvenida</div>
+                    <div class="flow-sub">Se envía al suscribirse</div>
+                  </div>
+                  <label class="toggle"><input type="checkbox" id="flow-welcome" checked /><span class="slider-t"></span></label>
+                </div>
+                <textarea class="msg-template" id="flow-welcome-msg">¡Bienvenido/a a {{tienda}}! 🎉
+Gracias por sumarte a nuestra comunidad.
+
+Te prometemos solo contenido de valor: ofertas exclusivas, lanzamientos y novedades.
+
+👉 Visitá nuestra tienda: {{link_tienda}}</textarea>
+              </div>
+
+              <div class="flow-item">
+                <div class="flow-header">
+                  <div class="flow-icon icon-amber"><i class="ti ti-shopping-cart-x"></i></div>
+                  <div class="flow-info">
+                    <div class="flow-name">Carrito abandonado</div>
+                    <div class="flow-sub">Email 2hs después del abandono</div>
+                  </div>
+                  <label class="toggle"><input type="checkbox" id="flow-carrito" checked /><span class="slider-t"></span></label>
+                </div>
+                <textarea class="msg-template" id="flow-carrito-msg">Hola {{nombre}}, olvidaste algo 🛒
+
+Tu {{producto}} sigue en tu carrito esperándote.
+Completá tu compra antes de que se agote el stock.
+
+🔗 {{link_carrito}}</textarea>
+              </div>
+
+              <div class="flow-item">
+                <div class="flow-header">
+                  <div class="flow-icon icon-blue"><i class="ti ti-package"></i></div>
+                  <div class="flow-info">
+                    <div class="flow-name">Post-compra</div>
+                    <div class="flow-sub">3 días después de la compra</div>
+                  </div>
+                  <label class="toggle"><input type="checkbox" id="flow-postcompra" /><span class="slider-t"></span></label>
+                </div>
+                <textarea class="msg-template" id="flow-postcompra-msg">¡Hola {{nombre}}! ¿Cómo llegó tu pedido? 📦
+
+Tu opinión es muy importante para nosotros.
+Dejanos tu reseña de {{producto}} y ayudá a otros a elegir.
+
+⭐ {{link_resena}}</textarea>
+              </div>
+
+              <div class="flow-item">
+                <div class="flow-header">
+                  <div class="flow-icon icon-purple"><i class="ti ti-gift"></i></div>
+                  <div class="flow-info">
+                    <div class="flow-name">Reactivación (60 días sin comprar)</div>
+                    <div class="flow-sub">Para clientes inactivos</div>
+                  </div>
+                  <label class="toggle"><input type="checkbox" id="flow-reactivacion" /><span class="slider-t"></span></label>
+                </div>
+                <textarea class="msg-template" id="flow-reactivacion-msg">¡Te extrañamos, {{nombre}}! 💙
+
+Hace un tiempo que no nos visitás. Tenemos novedades increíbles y un descuento especial solo para vos.
+
+🎁 Usá el código VOLVÉ10 y obtené 10% OFF
+👉 {{link_tienda}}</textarea>
+              </div>
+            </div>
+          </div>
+
+          <!-- Nueva campaña -->
+          <div class="form-section">
+            <div class="form-title"><i class="ti ti-speakerphone"></i> Nueva campaña</div>
+            <div class="form-group">
+              <label>Asunto del email</label>
+              <input type="text" id="campaign-subject" placeholder="🎉 Oferta especial — Solo por hoy" />
+            </div>
+            <div class="form-group">
+              <label>Segmento</label>
+              <select id="campaign-segment">
+                <option value="all">Todos los suscriptores</option>
+                <option value="active">Clientes activos (compraron en 30d)</option>
+                <option value="inactive">Inactivos (sin compra en 60d)</option>
+                <option value="abandoned">Carrito abandonado</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Cuerpo del email</label>
+              <textarea class="msg-template tall" id="campaign-body" placeholder="Escribí el cuerpo de tu campaña aquí..."></textarea>
+            </div>
+            <div class="form-row" style="margin-top:8px">
+              <button class="btn-outline btn-sm" id="btn-preview-campaign">
+                <i class="ti ti-eye"></i> Vista previa
+              </button>
+              <button class="btn-primary" id="btn-send-campaign">
+                <i class="ti ti-send"></i> Enviar campaña
+              </button>
+            </div>
+            <div class="notification" id="campaign-result" style="display:none"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Historial de campañas -->
+      <div class="form-section">
+        <div class="form-title"><i class="ti ti-history"></i> Historial de campañas</div>
+        <div class="campaign-table" id="campaign-table">
+          <!-- generado por JS -->
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== CATÁLOGO ===== -->
+    <section class="section" id="section-catalogo">
+      <div class="section-header">
+        <h2 class="section-title">Catálogo de productos</h2>
+        <div class="section-actions">
+          <button class="btn-outline btn-sm" id="btn-export-catalogo">
+            <i class="ti ti-download"></i> Exportar CSV
+          </button>
+          <button class="btn-primary btn-sm" id="btn-add-product">
+            <i class="ti ti-plus"></i> Nuevo producto
+          </button>
+        </div>
+      </div>
+
+      <!-- Buscador + filtros -->
+      <div class="catalog-controls">
+        <div class="catalog-search-wrap">
+          <i class="ti ti-search catalog-search-icon"></i>
+          <input type="text" id="catalog-search" class="catalog-search" placeholder="Buscar producto..." />
+        </div>
+        <select id="catalog-filter-cat" class="catalog-filter-sel">
+          <option value="">Todas las categorías</option>
+        </select>
+        <select id="catalog-sort" class="catalog-filter-sel">
+          <option value="name">Nombre A-Z</option>
+          <option value="price-asc">Precio ↑</option>
+          <option value="price-desc">Precio ↓</option>
+          <option value="stock">Stock</option>
+        </select>
+        <span class="catalog-count" id="catalog-count">0 productos</span>
+      </div>
+
+      <!-- Grid de productos -->
+      <div class="product-grid" id="product-grid">
+        <!-- generado por JS -->
+      </div>
+
+      <!-- Modal agregar/editar producto -->
+      <div class="modal-overlay" id="product-modal" style="display:none">
+        <div class="modal-box">
+          <div class="modal-header">
+            <h3 id="product-modal-title">Nuevo producto</h3>
+            <button class="modal-close" id="btn-close-product-modal"><i class="ti ti-x"></i></button>
+          </div>
+          <div class="modal-body">
+            <div class="form-row">
+              <div class="form-group">
+                <label>Nombre <span class="required">*</span></label>
+                <input type="text" id="prod-name" placeholder="Nombre del producto" />
+              </div>
+              <div class="form-group">
+                <label>Categoría</label>
+                <input type="text" id="prod-category" placeholder="Ropa, Tech, Belleza..." list="prod-cat-list" />
+                <datalist id="prod-cat-list"></datalist>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Precio <span class="required">*</span></label>
+                <input type="number" id="prod-price" placeholder="0" min="0" />
+              </div>
+              <div class="form-group">
+                <label>Precio tachado (oferta)</label>
+                <input type="number" id="prod-price-old" placeholder="0" min="0" />
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Stock</label>
+                <input type="number" id="prod-stock" placeholder="0" min="0" />
+              </div>
+              <div class="form-group">
+                <label>SKU / Código</label>
+                <input type="text" id="prod-sku" placeholder="PROD-001" />
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Descripción</label>
+              <textarea class="msg-template" id="prod-desc" placeholder="Descripción del producto..."></textarea>
+            </div>
+            <div class="form-group">
+              <label>URL de imagen</label>
+              <input type="text" id="prod-img" placeholder="https://..." />
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Link de venta / Checkout</label>
+                <input type="text" id="prod-link" placeholder="https://tu-tienda.com/producto" />
+              </div>
+              <div class="form-group" style="display:flex;align-items:flex-end">
+                <label class="toggle-row-inline" style="gap:8px;padding-bottom:4px">
+                  <label class="toggle"><input type="checkbox" id="prod-active" checked /><span class="slider-t"></span></label>
+                  Producto activo
+                </label>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button class="btn-outline" id="btn-cancel-product">Cancelar</button>
+            <button class="btn-primary" id="btn-save-product"><i class="ti ti-device-floppy"></i> Guardar producto</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== CONFIGURACIÓN ===== -->
+    <section class="section" id="section-configuracion">
+      <div class="section-header">
+        <h2 class="section-title">Configuración general</h2>
+        <div class="section-actions">
+          <button class="btn-outline btn-sm" id="btn-export-config">
+            <i class="ti ti-download"></i> Exportar backup
+          </button>
+          <button class="btn-outline btn-sm" id="btn-import-config">
+            <i class="ti ti-upload"></i> Importar backup
+          </button>
+          <input type="file" id="config-import-input" accept=".json" style="display:none" />
+          <button class="btn-primary btn-sm" id="btn-save-config">
+            <i class="ti ti-device-floppy"></i> Guardar
+          </button>
+        </div>
+      </div>
+
+      <div class="grid-2col">
+        <!-- Datos de la tienda -->
+        <div>
+          <div class="form-section">
+            <div class="form-title"><i class="ti ti-building-store"></i> Datos de tu tienda</div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Nombre de la tienda <span class="required">*</span></label>
+                <input type="text" id="cfg-store-name" placeholder="Mi Tienda Online" />
+              </div>
+              <div class="form-group">
+                <label>Rubro / categoría</label>
+                <select id="cfg-store-category">
+                  <option value="">Seleccionar...</option>
+                  <option>Moda y ropa</option>
+                  <option>Electrónica</option>
+                  <option>Alimentos y bebidas</option>
+                  <option>Belleza y cosméticos</option>
+                  <option>Hogar y decoración</option>
+                  <option>Deportes</option>
+                  <option>Servicios</option>
+                  <option>Otro</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>URL de la tienda</label>
+                <input type="url" id="cfg-store-url" placeholder="https://mitienda.com" />
+              </div>
+              <div class="form-group">
+                <label>Instagram handle</label>
+                <input type="text" id="cfg-store-ig" placeholder="@mitienda" />
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Email de contacto</label>
+                <input type="email" id="cfg-store-email" placeholder="ventas@mitienda.com" />
+              </div>
+              <div class="form-group">
+                <label>WhatsApp de atención</label>
+                <input type="tel" id="cfg-store-whatsapp" placeholder="+54 9 11 xxxx-xxxx" />
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>País / Moneda</label>
+                <select id="cfg-store-country">
+                  <option value="AR">🇦🇷 Argentina (ARS)</option>
+                  <option value="CL">🇨🇱 Chile (CLP)</option>
+                  <option value="MX">🇲🇽 México (MXN)</option>
+                  <option value="CO">🇨🇴 Colombia (COP)</option>
+                  <option value="BR">🇧🇷 Brasil (BRL)</option>
+                  <option value="UY">🇺🇾 Uruguay (UYU)</option>
+                  <option value="PE">🇵🇪 Perú (PEN)</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Zona horaria</label>
+                <select id="cfg-timezone">
+                  <option value="America/Argentina/Buenos_Aires">Argentina (GMT-3)</option>
+                  <option value="America/Santiago">Chile (GMT-4)</option>
+                  <option value="America/Mexico_City">México (GMT-6)</option>
+                  <option value="America/Bogota">Colombia (GMT-5)</option>
+                  <option value="America/Sao_Paulo">Brasil (GMT-3)</option>
+                  <option value="America/Montevideo">Uruguay (GMT-3)</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Contacto directo -->
+          <div class="form-section">
+            <div class="form-title"><i class="ti ti-phone"></i> Contacto directo</div>
+            <div class="contact-buttons-grid">
+              <a id="cfg-whatsapp-link" href="#" class="contact-card-btn whatsapp-btn" target="_blank">
+                <i class="ti ti-brand-whatsapp"></i>
+                <span>WhatsApp</span>
+                <span class="contact-num" id="cfg-wa-display">No configurado</span>
+              </a>
+              <a id="cfg-email-link" href="#" class="contact-card-btn email-btn">
+                <i class="ti ti-mail"></i>
+                <span>Email</span>
+                <span class="contact-num" id="cfg-email-display">No configurado</span>
+              </a>
+              <a id="cfg-ig-link" href="#" class="contact-card-btn ig-btn" target="_blank">
+                <i class="ti ti-brand-instagram"></i>
+                <span>Instagram</span>
+                <span class="contact-num" id="cfg-ig-display">No configurado</span>
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Notificaciones + peligro -->
+        <div>
+          <div class="form-section">
+            <div class="form-title"><i class="ti ti-bell"></i> Notificaciones</div>
+            <div class="toggle-row">
+              <div><div class="toggle-label">Nueva venta</div><div class="toggle-sub">Email + notificación push</div></div>
+              <label class="toggle"><input type="checkbox" id="notif-venta" checked /><span class="slider-t"></span></label>
+            </div>
+            <div class="toggle-row">
+              <div><div class="toggle-label">Carrito recuperado</div><div class="toggle-sub">Email cuando se completa una recuperación</div></div>
+              <label class="toggle"><input type="checkbox" id="notif-carrito" checked /><span class="slider-t"></span></label>
+            </div>
+            <div class="toggle-row">
+              <div><div class="toggle-label">Nuevo mensaje en bot</div><div class="toggle-sub">Push cuando el bot recibe un DM</div></div>
+              <label class="toggle"><input type="checkbox" id="notif-bot" /><span class="slider-t"></span></label>
+            </div>
+            <div class="toggle-row">
+              <div><div class="toggle-label">Reporte diario</div><div class="toggle-sub">Resumen de métricas cada mañana por email</div></div>
+              <label class="toggle"><input type="checkbox" id="notif-reporte" checked /><span class="slider-t"></span></label>
+            </div>
+            <div class="toggle-row">
+              <div><div class="toggle-label">Alertas de stock bajo</div><div class="toggle-sub">Cuando un producto baja de 5 unidades</div></div>
+              <label class="toggle"><input type="checkbox" id="notif-stock" checked /><span class="slider-t"></span></label>
+            </div>
+            <div class="form-group" style="margin-top:12px">
+              <label>Email para notificaciones</label>
+              <input type="email" id="notif-email" placeholder="admin@mitienda.com" />
+            </div>
+          </div>
+
+          <div class="form-section">
+            <div class="form-title"><i class="ti ti-palette"></i> Apariencia</div>
+            <div class="toggle-row">
+              <div><div class="toggle-label">Modo oscuro</div><div class="toggle-sub">Cambiá el tema visual</div></div>
+              <label class="toggle"><input type="checkbox" id="cfg-dark-mode" /><span class="slider-t"></span></label>
+            </div>
+          </div>
+
+          <div class="form-section danger-zone">
+            <div class="form-title" style="color:var(--color-red)"><i class="ti ti-alert-triangle"></i> Zona de peligro</div>
+            <div class="danger-actions">
+              <div class="danger-item">
+                <div>
+                  <div class="danger-label">Resetear toda la configuración</div>
+                  <div class="danger-sub">Borra todos los datos guardados — acción irreversible</div>
+                </div>
+                <button class="btn-danger" id="btn-reset-all">
+                  <i class="ti ti-trash"></i> Resetear
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- Toast notification -->
+<div class="toast" id="toast"></div>
+
+<!-- Wizard de onboarding -->
+<div class="wizard-overlay" id="wizard-overlay" style="display:none">
+  <div class="wizard-box">
+    <div class="wizard-progress-bar">
+      <div class="wizard-progress-fill" id="wizard-progress-fill"></div>
+    </div>
+    <div class="wizard-steps">
+      <!-- Step 1 -->
+      <div class="wizard-step active" id="wstep-1">
+        <div class="wizard-icon"><i class="ti ti-building-store"></i></div>
+        <h3>¡Bienvenido a la Máquina de Ventas! 🚀</h3>
+        <p>Configuremos tu sistema en 4 pasos rápidos para que empieces a vender más hoy.</p>
+        <div class="form-group" style="margin-top:1.5rem">
+          <label>¿Cuál es el nombre de tu tienda? <span class="required">*</span></label>
+          <input type="text" id="wiz-store-name" placeholder="Mi Tienda Online" />
+        </div>
+        <div class="form-group">
+          <label>¿En qué rubro?</label>
+          <select id="wiz-category">
+            <option value="">Seleccionar...</option>
+            <option>Moda y ropa</option>
+            <option>Electrónica</option>
+            <option>Alimentos y bebidas</option>
+            <option>Belleza y cosméticos</option>
+            <option>Hogar y decoración</option>
+            <option>Deportes</option>
+            <option>Servicios</option>
+            <option>Otro</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Instagram / web</label>
+          <input type="text" id="wiz-ig" placeholder="@mitienda o www.mitienda.com" />
+        </div>
+      </div>
+      <!-- Step 2 -->
+      <div class="wizard-step" id="wstep-2">
+        <div class="wizard-icon"><i class="ti ti-credit-card"></i></div>
+        <h3>Conectá Mercado Pago 💳</h3>
+        <p>Para recibir pagos necesitás tu Access Token. Lo encontrás en <strong>mercadopago.com/developers</strong>.</p>
+        <div class="form-group" style="margin-top:1.5rem">
+          <label>Access Token</label>
+          <div class="input-with-action">
+            <input type="password" id="wiz-mp-token" placeholder="TEST-xxxx o APP_USR-xxxx" />
+            <button class="btn-icon" onclick="togglePassword('wiz-mp-token')"><i class="ti ti-eye"></i></button>
+          </div>
+          <span class="field-hint">Podés saltear este paso y configurarlo después</span>
+        </div>
+        <div class="form-group">
+          <label>Public Key</label>
+          <input type="text" id="wiz-mp-pubkey" placeholder="TEST-xxxx o APP_USR-pub-xxxx" />
+        </div>
+      </div>
+      <!-- Step 3 -->
+      <div class="wizard-step" id="wstep-3">
+        <div class="wizard-icon"><i class="ti ti-robot"></i></div>
+        <h3>Activá tu bot de ventas 🤖</h3>
+        <p>El bot responde automáticamente a tus clientes en Instagram y WhatsApp. ¿Qué canales querés activar?</p>
+        <div class="wizard-channels" style="margin-top:1.5rem">
+          <label class="wizard-channel-card">
+            <input type="checkbox" id="wiz-ch-instagram" checked />
+            <div class="wiz-channel-body">
+              <i class="ti ti-brand-instagram" style="color:#E4405F;font-size:24px"></i>
+              <span>Instagram DMs</span>
+            </div>
+          </label>
+          <label class="wizard-channel-card">
+            <input type="checkbox" id="wiz-ch-whatsapp" checked />
+            <div class="wiz-channel-body">
+              <i class="ti ti-brand-whatsapp" style="color:#25D366;font-size:24px"></i>
+              <span>WhatsApp Business</span>
+            </div>
+          </label>
+          <label class="wizard-channel-card">
+            <input type="checkbox" id="wiz-ch-facebook" />
+            <div class="wiz-channel-body">
+              <i class="ti ti-brand-facebook" style="color:#1877F2;font-size:24px"></i>
+              <span>Facebook Messenger</span>
+            </div>
+          </label>
+        </div>
+      </div>
+      <!-- Step 4 -->
+      <div class="wizard-step" id="wstep-4">
+        <div class="wizard-icon success-icon"><i class="ti ti-circle-check"></i></div>
+        <h3>¡Todo listo para vender! 🎉</h3>
+        <p>Tu sistema está configurado. Estos son los próximos pasos recomendados:</p>
+        <div class="wizard-next-steps">
+          <div class="wiz-next-item"><i class="ti ti-brand-meta"></i> Instalar el Pixel de Facebook para rastrear conversiones</div>
+          <div class="wiz-next-item"><i class="ti ti-shopping-cart"></i> Configurar la secuencia de carrito abandonado</div>
+          <div class="wiz-next-item"><i class="ti ti-package"></i> Agregar tus productos al catálogo</div>
+          <div class="wiz-next-item"><i class="ti ti-mail"></i> Activar Email Marketing para newsletters</div>
+        </div>
+      </div>
+    </div>
+    <div class="wizard-footer">
+      <button class="btn-outline" id="wiz-btn-back" style="display:none">
+        <i class="ti ti-arrow-left"></i> Atrás
+      </button>
+      <div class="wizard-step-indicators" id="wiz-indicators"></div>
+      <button class="btn-primary" id="wiz-btn-next">
+        Siguiente <i class="ti ti-arrow-right"></i>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal preview email -->
+<div class="modal-overlay" id="email-preview-modal" style="display:none">
+  <div class="modal-box modal-lg">
+    <div class="modal-header">
+      <h3>Vista previa del email</h3>
+      <button class="modal-close" id="btn-close-email-preview"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="modal-body">
+      <div class="email-preview-wrap" id="email-preview-content"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Supabase layer (orden crítico: client → auth → db → realtime → sync) -->
+<script src="supabase/client.js"></script>
+<script src="supabase/auth.js"></script>
+<script src="supabase/db.js"></script>
+<script src="supabase/realtime.js"></script>
+<script src="supabase/sync.js"></script>
+
+<!-- JS modules -->
+<script src="js/state.js"></script>
+<script src="js/utils.js"></script>
+<script src="js/dashboard.js"></script>
+<script src="js/pagos.js"></script>
+<script src="js/carrito.js"></script>
+<script src="js/ventas.js"></script>
+<script src="js/pixel.js"></script>
+<script src="js/auditoria.js"></script>
+<script src="js/email.js"></script>
+<script src="js/catalogo.js"></script>
+<script src="js/configuracion.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

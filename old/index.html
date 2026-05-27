@@ -1,0 +1,915 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sistema Automático de Ventas</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&family=DM+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-icon">⚡</div>
+      <div>
+        <div class="logo-title">VentasAuto</div>
+        <div class="logo-sub">Sistema Profesional</div>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-label">Principal</div>
+      <a class="nav-item active" href="#" data-page="dashboard">
+        <span class="nav-icon">📊</span> Dashboard
+      </a>
+      <a class="nav-item" href="#" data-page="pagos">
+        <span class="nav-icon">💳</span> Configuración de Pagos
+      </a>
+      <a class="nav-item" href="#" data-page="carrito">
+        <span class="nav-icon">🛒</span> Carrito Abandonado
+      </a>
+      <a class="nav-item" href="#" data-page="autoventas">
+        <span class="nav-icon">🤖</span> Auto-Ventas
+      </a>
+      <a class="nav-item" href="#" data-page="pixel">
+        <span class="nav-icon">📡</span> Pixel Publicitario
+      </a>
+      <div class="nav-label" style="margin-top:1.5rem">Cuenta</div>
+      <a class="nav-item highlight" href="#" data-page="auditoria">
+        <span class="nav-icon">✅</span> Auditoría Gratuita
+      </a>
+      <a class="nav-item" href="#" data-page="configuracion">
+        <span class="nav-icon">⚙️</span> Configuración
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="system-status">
+        <div class="status-pulse"></div>
+        <span>Sistema activo · 24/7</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+    <!-- TOP BAR -->
+    <header class="topbar">
+      <button class="menu-btn" id="menuBtn">☰</button>
+      <div class="topbar-title" id="pageTitle">Dashboard</div>
+      <div class="topbar-right">
+        <div class="topbar-store">
+          <span class="store-dot"></span>
+          <span id="storeName">Mi Tienda</span>
+        </div>
+        <div class="topbar-avatar">MT</div>
+      </div>
+    </header>
+
+    <!-- PAGES -->
+    <div class="page-content">
+
+      <!-- ======================== DASHBOARD ======================== -->
+      <div class="page active" id="page-dashboard">
+        <div class="page-header">
+          <h1>Dashboard</h1>
+          <div class="header-actions">
+            <select class="select-small" id="periodSelect">
+              <option value="hoy">Hoy</option>
+              <option value="semana">Esta semana</option>
+              <option value="mes">Este mes</option>
+            </select>
+            <button class="btn-outline" onclick="exportarReporte()">↓ Exportar</button>
+          </div>
+        </div>
+
+        <div class="kpi-grid">
+          <div class="kpi-card green">
+            <div class="kpi-trend">↑ 12% vs ayer</div>
+            <div class="kpi-value" id="kpi-ventas">$148.500</div>
+            <div class="kpi-label">Ventas del período</div>
+          </div>
+          <div class="kpi-card blue">
+            <div class="kpi-trend">↑ 3 vs ayer</div>
+            <div class="kpi-value" id="kpi-pedidos">15</div>
+            <div class="kpi-label">Pedidos completados</div>
+          </div>
+          <div class="kpi-card amber">
+            <div class="kpi-trend">3 carritos recuperados</div>
+            <div class="kpi-value" id="kpi-recuperado">$26.730</div>
+            <div class="kpi-label">Recuperado (carrito)</div>
+          </div>
+          <div class="kpi-card red">
+            <div class="kpi-trend">↓ 4% vs ayer</div>
+            <div class="kpi-value" id="kpi-abandono">26%</div>
+            <div class="kpi-label">Tasa de abandono</div>
+          </div>
+        </div>
+
+        <div class="dash-grid">
+          <!-- Chart -->
+          <div class="card chart-card">
+            <div class="card-header">
+              <h3>Ventas de la semana</h3>
+              <span class="badge badge-green">En vivo</span>
+            </div>
+            <div class="chart-container">
+              <canvas id="ventasChart"></canvas>
+            </div>
+          </div>
+
+          <!-- Módulos status -->
+          <div class="card">
+            <div class="card-header"><h3>Estado de módulos</h3></div>
+            <div class="module-status-list">
+              <div class="module-row">
+                <div class="module-info">
+                  <span class="module-emoji">💳</span>
+                  <div>
+                    <div class="module-name">Mercado Pago</div>
+                    <div class="module-desc">Pagos conectados</div>
+                  </div>
+                </div>
+                <span class="pill pill-on">Activo</span>
+              </div>
+              <div class="module-row">
+                <div class="module-info">
+                  <span class="module-emoji">🛒</span>
+                  <div>
+                    <div class="module-name">Recuperación carrito</div>
+                    <div class="module-desc">Secuencia 2/3 activa</div>
+                  </div>
+                </div>
+                <span class="pill pill-warn">Parcial</span>
+              </div>
+              <div class="module-row">
+                <div class="module-info">
+                  <span class="module-emoji">🤖</span>
+                  <div>
+                    <div class="module-name">Bot auto-ventas</div>
+                    <div class="module-desc">98% respuestas</div>
+                  </div>
+                </div>
+                <span class="pill pill-on">Activo</span>
+              </div>
+              <div class="module-row">
+                <div class="module-info">
+                  <span class="module-emoji">📡</span>
+                  <div>
+                    <div class="module-name">Pixel Meta</div>
+                    <div class="module-desc">Sin configurar</div>
+                  </div>
+                </div>
+                <span class="pill pill-off">Inactivo</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Feed en tiempo real -->
+        <div class="card">
+          <div class="card-header">
+            <h3>Actividad en tiempo real</h3>
+            <div class="live-indicator">
+              <div class="live-dot"></div> En vivo
+            </div>
+          </div>
+          <div class="feed" id="activityFeed">
+            <div class="feed-item">
+              <span class="feed-tag tag-venta">Venta</span>
+              <span class="feed-msg">María G. compró <strong>Pack Premium</strong> — $28.000</span>
+              <span class="feed-time">hace 2 min</span>
+            </div>
+            <div class="feed-item">
+              <span class="feed-tag tag-carrito">Carrito</span>
+              <span class="feed-msg">Recordatorio enviado a <strong>lucas@mail.com</strong></span>
+              <span class="feed-time">hace 8 min</span>
+            </div>
+            <div class="feed-item">
+              <span class="feed-tag tag-venta">Venta</span>
+              <span class="feed-msg">Carlos R. compró <strong>Producto B</strong> — $8.200</span>
+              <span class="feed-time">hace 15 min</span>
+            </div>
+            <div class="feed-item">
+              <span class="feed-tag tag-pixel">Pixel</span>
+              <span class="feed-msg">Evento <strong>AddToCart</strong> — Instagram</span>
+              <span class="feed-time">hace 21 min</span>
+            </div>
+            <div class="feed-item">
+              <span class="feed-tag tag-recuperado">Recuperado</span>
+              <span class="feed-msg">Ana P. completó su compra — $6.900</span>
+              <span class="feed-time">hace 34 min</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ======================== PAGOS ======================== -->
+      <div class="page" id="page-pagos">
+        <div class="page-header">
+          <h1>Configuración de Pagos</h1>
+          <span class="badge badge-green">Mercado Pago conectado</span>
+        </div>
+
+        <div class="two-col">
+          <div>
+            <div class="card">
+              <div class="card-header"><h3>🏦 Credenciales Mercado Pago</h3></div>
+              <div class="form-body">
+                <div class="form-group">
+                  <label>Entorno</label>
+                  <select id="mp-env" onchange="toggleMPEnv()">
+                    <option value="produccion">Producción</option>
+                    <option value="sandbox">Sandbox (pruebas)</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label>Access Token</label>
+                  <div class="input-with-btn">
+                    <input type="password" id="mp-token" placeholder="APP_USR-..." value="APP_USR-demo-token-produccion" />
+                    <button class="btn-icon" onclick="toggleVisibility('mp-token')">👁</button>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label>Public Key</label>
+                  <input type="text" id="mp-pubkey" placeholder="APP_USR-xxxxx" value="APP_USR-pub-demo-key" />
+                </div>
+                <div class="form-row-2">
+                  <div class="form-group">
+                    <label>País</label>
+                    <select id="mp-country">
+                      <option value="AR" selected>🇦🇷 Argentina</option>
+                      <option value="CL">🇨🇱 Chile</option>
+                      <option value="MX">🇲🇽 México</option>
+                      <option value="CO">🇨🇴 Colombia</option>
+                      <option value="BR">🇧🇷 Brasil</option>
+                      <option value="UY">🇺🇾 Uruguay</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label>Moneda</label>
+                    <select id="mp-currency">
+                      <option value="ARS" selected>ARS — Peso arg.</option>
+                      <option value="USD">USD — Dólar</option>
+                      <option value="CLP">CLP — Peso chileno</option>
+                      <option value="MXN">MXN — Peso mx.</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label>Webhook URL (notificaciones)</label>
+                  <div class="input-with-btn">
+                    <input type="text" id="webhook-url" value="https://mitienda.com/webhooks/mp" readonly />
+                    <button class="btn-icon" onclick="copiarWebhook()">📋</button>
+                  </div>
+                </div>
+                <div class="form-actions">
+                  <button class="btn-primary" onclick="guardarMP()">💾 Guardar y probar conexión</button>
+                  <button class="btn-outline" onclick="probarConexionMP()">🔌 Probar API</button>
+                </div>
+                <div class="alert alert-success" id="mp-success" style="display:none">
+                  ✅ Conexión exitosa con Mercado Pago. Access Token válido.
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <div class="card">
+              <div class="card-header"><h3>💳 Métodos habilitados</h3></div>
+              <div class="toggle-list">
+                <div class="toggle-item">
+                  <div class="toggle-info">
+                    <div class="toggle-title">Tarjeta de crédito</div>
+                    <div class="toggle-sub">Visa, Mastercard, Amex, Naranja</div>
+                  </div>
+                  <label class="toggle-switch">
+                    <input type="checkbox" checked onchange="updatePaymentMethod('credito', this.checked)" />
+                    <span class="switch-track"></span>
+                  </label>
+                </div>
+                <div class="toggle-item">
+                  <div class="toggle-info">
+                    <div class="toggle-title">Tarjeta de débito</div>
+                    <div class="toggle-sub">Débito inmediato</div>
+                  </div>
+                  <label class="toggle-switch">
+                    <input type="checkbox" checked onchange="updatePaymentMethod('debito', this.checked)" />
+                    <span class="switch-track"></span>
+                  </label>
+                </div>
+                <div class="toggle-item">
+                  <div class="toggle-info">
+                    <div class="toggle-title">Transferencia bancaria</div>
+                    <div class="toggle-sub">CVU / CBU — sin comisión</div>
+                  </div>
+                  <label class="toggle-switch">
+                    <input type="checkbox" checked onchange="updatePaymentMethod('transferencia', this.checked)" />
+                    <span class="switch-track"></span>
+                  </label>
+                </div>
+                <div class="toggle-item">
+                  <div class="toggle-info">
+                    <div class="toggle-title">Efectivo (Rapipago / Pago Fácil)</div>
+                    <div class="toggle-sub">Genera cupón automático</div>
+                  </div>
+                  <label class="toggle-switch">
+                    <input type="checkbox" onchange="updatePaymentMethod('efectivo', this.checked)" />
+                    <span class="switch-track"></span>
+                  </label>
+                </div>
+                <div class="toggle-item">
+                  <div class="toggle-info">
+                    <div class="toggle-title">Cuotas sin interés</div>
+                    <div class="toggle-sub">Hasta 12 cuotas MSI</div>
+                  </div>
+                  <label class="toggle-switch">
+                    <input type="checkbox" checked onchange="updatePaymentMethod('cuotas', this.checked)" />
+                    <span class="switch-track"></span>
+                  </label>
+                </div>
+                <div class="toggle-item">
+                  <div class="toggle-info">
+                    <div class="toggle-title">Checkout Pro</div>
+                    <div class="toggle-sub">Redirect a Mercado Pago</div>
+                  </div>
+                  <label class="toggle-switch">
+                    <input type="checkbox" checked onchange="updatePaymentMethod('checkoutpro', this.checked)" />
+                    <span class="switch-track"></span>
+                  </label>
+                </div>
+                <div class="toggle-item">
+                  <div class="toggle-info">
+                    <div class="toggle-title">Checkout API (Brick)</div>
+                    <div class="toggle-sub">Formulario embebido en tu tienda</div>
+                  </div>
+                  <label class="toggle-switch">
+                    <input type="checkbox" onchange="updatePaymentMethod('checkoutapi', this.checked)" />
+                    <span class="switch-track"></span>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <div class="card" style="margin-top:1rem">
+              <div class="card-header"><h3>📊 Comisiones estimadas</h3></div>
+              <div class="comisiones-table">
+                <div class="com-row"><span>Crédito 1 cuota</span><span class="com-pct">3.99%</span></div>
+                <div class="com-row"><span>Crédito 3 cuotas</span><span class="com-pct">6.99%</span></div>
+                <div class="com-row"><span>Débito</span><span class="com-pct">1.99%</span></div>
+                <div class="com-row"><span>Transferencia</span><span class="com-pct green">0%</span></div>
+                <div class="com-row"><span>Efectivo</span><span class="com-pct">4.99%</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ======================== CARRITO ======================== -->
+      <div class="page" id="page-carrito">
+        <div class="page-header">
+          <h1>Carrito Abandonado</h1>
+          <div class="kpi-inline">
+            <span class="inline-kpi green">$47.100 recuperado este mes</span>
+          </div>
+        </div>
+
+        <div class="two-col">
+          <div>
+            <div class="card">
+              <div class="card-header"><h3>📧 Secuencia de recuperación</h3></div>
+              <div class="sequence">
+                <div class="seq-step">
+                  <div class="seq-num">1</div>
+                  <div class="seq-body">
+                    <div class="seq-title">1 hora después — Email automático</div>
+                    <div class="seq-sub">Recordatorio amigable con enlace directo al carrito</div>
+                    <textarea class="msg-textarea" id="msg1">Hola {nombre}! 👋 Notamos que dejaste productos en tu carrito. ¡Tu {producto} te está esperando! Completá tu compra: {link_carrito}</textarea>
+                    <label class="toggle-switch inline-toggle">
+                      <input type="checkbox" checked />
+                      <span class="switch-track"></span>
+                    </label>
+                  </div>
+                </div>
+                <div class="seq-connector">↓</div>
+                <div class="seq-step">
+                  <div class="seq-num warn">2</div>
+                  <div class="seq-body">
+                    <div class="seq-title">24 horas después — Email con descuento</div>
+                    <div class="seq-sub">Incluye cupón de descuento automático</div>
+                    <textarea class="msg-textarea" id="msg2">¡Hola {nombre}! Tu carrito sigue aquí. Por ser especial, te regalamos un {descuento}% OFF. Usá el código: {codigo} — válido por {horas} horas.</textarea>
+                    <label class="toggle-switch inline-toggle">
+                      <input type="checkbox" checked />
+                      <span class="switch-track"></span>
+                    </label>
+                  </div>
+                </div>
+                <div class="seq-connector">↓</div>
+                <div class="seq-step">
+                  <div class="seq-num off">3</div>
+                  <div class="seq-body">
+                    <div class="seq-title">48 horas después — WhatsApp (opcional)</div>
+                    <div class="seq-sub">Si el cliente dejó número de teléfono</div>
+                    <textarea class="msg-textarea" id="msg3">Hola {nombre}! Soy de {tienda}. Tu carrito está por vencer 😮 ¿Puedo ayudarte con algo? Ingresá acá: {link_carrito}</textarea>
+                    <label class="toggle-switch inline-toggle">
+                      <input type="checkbox" />
+                      <span class="switch-track"></span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <div class="card">
+              <div class="card-header"><h3>⚙️ Configuración de descuentos</h3></div>
+              <div class="form-body">
+                <div class="form-group">
+                  <label>% de descuento en 2° recordatorio</label>
+                  <div class="input-range-row">
+                    <input type="range" min="5" max="30" value="10" id="desc-pct" oninput="updateDescPct(this.value)" />
+                    <span class="range-val" id="desc-pct-val">10%</span>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label>Validez del cupón (horas)</label>
+                  <div class="input-range-row">
+                    <input type="range" min="6" max="72" value="24" id="cupón-horas" oninput="updateHoras(this.value)" />
+                    <span class="range-val" id="cupón-horas-val">24hs</span>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label>Prefijo del cupón</label>
+                  <input type="text" value="VUELVE" id="cupon-prefix" />
+                </div>
+                <div class="form-group">
+                  <label>Monto mínimo para recuperar</label>
+                  <input type="number" value="1000" id="min-amount" />
+                </div>
+                <button class="btn-primary" onclick="guardarCarrito()">💾 Guardar secuencia</button>
+              </div>
+            </div>
+
+            <div class="card" style="margin-top:1rem">
+              <div class="card-header"><h3>📈 Stats del mes</h3></div>
+              <div class="stats-grid2">
+                <div class="stat2"><div class="s2-val">38</div><div class="s2-lab">Carritos detectados</div></div>
+                <div class="stat2"><div class="s2-val green">11</div><div class="s2-lab">Recuperados</div></div>
+                <div class="stat2"><div class="s2-val amber">29%</div><div class="s2-lab">Tasa recuperación</div></div>
+                <div class="stat2"><div class="s2-val blue">$4.282</div><div class="s2-lab">Ticket promedio</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Lista de carritos -->
+        <div class="card">
+          <div class="card-header">
+            <h3>🛒 Carritos abandonados recientes</h3>
+            <button class="btn-outline sm" onclick="exportarCarritos()">↓ Exportar CSV</button>
+          </div>
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Cliente</th>
+                <th>Productos</th>
+                <th>Monto</th>
+                <th>Hace</th>
+                <th>Estado</th>
+                <th>Acción</th>
+              </tr>
+            </thead>
+            <tbody id="carritosTable">
+              <tr>
+                <td><div class="client-cell"><div class="avatar sm">LM</div><div><strong>Lucas Martínez</strong><div class="sub-text">lucas@mail.com</div></div></div></td>
+                <td>Producto A x2</td>
+                <td>$15.300</td>
+                <td>2h</td>
+                <td><span class="pill pill-warn">1° reminder</span></td>
+                <td><button class="btn-micro" onclick="enviarManual('lucas@mail.com')">Enviar ahora</button></td>
+              </tr>
+              <tr>
+                <td><div class="client-cell"><div class="avatar sm">VS</div><div><strong>Valentina Sosa</strong><div class="sub-text">vale.s@gmail.com</div></div></div></td>
+                <td>Pack Especial</td>
+                <td>$9.800</td>
+                <td>5h</td>
+                <td><span class="pill pill-warn">2° reminder</span></td>
+                <td><button class="btn-micro" onclick="enviarManual('vale.s@gmail.com')">Enviar ahora</button></td>
+              </tr>
+              <tr>
+                <td><div class="client-cell"><div class="avatar sm green">RD</div><div><strong>Roberto Díaz</strong><div class="sub-text">rdi@hotmail.com</div></div></div></td>
+                <td>Producto B x1</td>
+                <td>$22.000</td>
+                <td>1d</td>
+                <td><span class="pill pill-on">Recuperado ✓</span></td>
+                <td><span class="text-muted">Completado</span></td>
+              </tr>
+              <tr>
+                <td><div class="client-cell"><div class="avatar sm">FR</div><div><strong>Florencia Ruiz</strong><div class="sub-text">flor.r@yahoo.com</div></div></div></td>
+                <td>Producto C x3</td>
+                <td>$7.400</td>
+                <td>2d</td>
+                <td><span class="pill pill-off">Expirado</span></td>
+                <td><button class="btn-micro" onclick="enviarManual('flor.r@yahoo.com')">Reactivar</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ======================== AUTO-VENTAS ======================== -->
+      <div class="page" id="page-autoventas">
+        <div class="page-header">
+          <h1>Sistema Auto-Ventas</h1>
+          <span class="badge badge-green">🤖 Bot activo 24/7</span>
+        </div>
+
+        <div class="kpi-grid mini">
+          <div class="kpi-card blue">
+            <div class="kpi-value">98%</div>
+            <div class="kpi-label">Tasa de respuesta</div>
+          </div>
+          <div class="kpi-card green">
+            <div class="kpi-value">1.4s</div>
+            <div class="kpi-label">Tiempo prom. respuesta</div>
+          </div>
+          <div class="kpi-card amber">
+            <div class="kpi-value">47</div>
+            <div class="kpi-label">Chats hoy</div>
+          </div>
+          <div class="kpi-card red">
+            <div class="kpi-value">34%</div>
+            <div class="kpi-label">Tasa conversión bot</div>
+          </div>
+        </div>
+
+        <div class="two-col">
+          <div>
+            <div class="card">
+              <div class="card-header"><h3>🔌 Canales activos</h3></div>
+              <div class="toggle-list">
+                <div class="toggle-item">
+                  <div class="toggle-info">
+                    <div class="toggle-title">📸 DMs de Instagram</div>
+                    <div class="toggle-sub">Responde mensajes automáticamente</div>
+                  </div>
+                  <label class="toggle-switch">
+                    <input type="checkbox" checked />
+                    <span class="switch-track"></span>
+                  </label>
+                </div>
+                <div class="toggle-item">
+                  <div class="toggle-info">
+                    <div class="toggle-title">💬 WhatsApp Business</div>
+                    <div class="toggle-sub">Cotizaciones y catálogo automático</div>
+                  </div>
+                  <label class="toggle-switch">
+                    <input type="checkbox" checked />
+                    <span class="switch-track"></span>
+                  </label>
+                </div>
+                <div class="toggle-item">
+                  <div class="toggle-info">
+                    <div class="toggle-title">📘 Facebook Messenger</div>
+                    <div class="toggle-sub">Chat integrado con fanpage</div>
+                  </div>
+                  <label class="toggle-switch">
+                    <input type="checkbox" />
+                    <span class="switch-track"></span>
+                  </label>
+                </div>
+                <div class="toggle-item">
+                  <div class="toggle-info">
+                    <div class="toggle-title">🌐 Chat web (widget)</div>
+                    <div class="toggle-sub">Burbuja de chat en tu sitio</div>
+                  </div>
+                  <label class="toggle-switch">
+                    <input type="checkbox" checked />
+                    <span class="switch-track"></span>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <div class="card" style="margin-top:1rem">
+              <div class="card-header"><h3>⏰ Horarios del bot</h3></div>
+              <div class="form-body">
+                <div class="toggle-item">
+                  <div class="toggle-info">
+                    <div class="toggle-title">Modo 24/7</div>
+                    <div class="toggle-sub">El bot siempre activo</div>
+                  </div>
+                  <label class="toggle-switch">
+                    <input type="checkbox" checked id="toggle247" onchange="toggleHorario(this.checked)" />
+                    <span class="switch-track"></span>
+                  </label>
+                </div>
+                <div id="horario-manual" style="display:none">
+                  <div class="form-row-2" style="margin-top:.75rem">
+                    <div class="form-group">
+                      <label>Desde</label>
+                      <input type="time" value="08:00" />
+                    </div>
+                    <div class="form-group">
+                      <label>Hasta</label>
+                      <input type="time" value="23:00" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <div class="card">
+              <div class="card-header"><h3>💬 Mensajes automáticos</h3></div>
+              <div class="form-body">
+                <div class="form-group">
+                  <label>Bienvenida (primer mensaje)</label>
+                  <textarea class="msg-textarea" id="bot-bienvenida">¡Hola! 👋 Bienvenido/a a {tienda}. ¿En qué te puedo ayudar hoy? Escribime "catálogo" para ver todos nuestros productos o "precio de [producto]" para cotizar.</textarea>
+                </div>
+                <div class="form-group">
+                  <label>Fuera de horario</label>
+                  <textarea class="msg-textarea" id="bot-fuera">Gracias por escribirnos! 🌙 Estamos fuera de horario pero tu mensaje es importante. Te respondemos a primera hora. Si querés, podés ver nuestro catálogo online: {link_catalogo}</textarea>
+                </div>
+                <div class="form-group">
+                  <label>Derivar a humano</label>
+                  <textarea class="msg-textarea" id="bot-humano">Un momento, te voy a pasar con un asesor! 👤 En 2 minutos te contactamos.</textarea>
+                </div>
+                <button class="btn-primary" onclick="guardarBot()">💾 Guardar respuestas</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- FAQ auto-respuestas -->
+        <div class="card">
+          <div class="card-header">
+            <h3>❓ Preguntas frecuentes automáticas</h3>
+            <button class="btn-outline sm" onclick="agregarFAQ()">+ Agregar pregunta</button>
+          </div>
+          <div id="faq-list">
+            <div class="faq-item">
+              <div class="faq-trigger"><input type="text" value="precio / cuánto cuesta / costo" class="faq-input" /></div>
+              <div class="faq-response"><textarea class="faq-textarea">Nuestros precios van desde $5.000 hasta $50.000 según el producto. Escribime qué necesitás y te cotizo al instante!</textarea></div>
+              <button class="btn-delete" onclick="this.parentElement.remove()">✕</button>
+            </div>
+            <div class="faq-item">
+              <div class="faq-trigger"><input type="text" value="envío / entrega / flete" class="faq-input" /></div>
+              <div class="faq-response"><textarea class="faq-textarea">Hacemos envíos a todo el país por Correo Argentino, OCA y Andreani. El costo depende de tu zona. ¿Me decís tu código postal?</textarea></div>
+              <button class="btn-delete" onclick="this.parentElement.remove()">✕</button>
+            </div>
+            <div class="faq-item">
+              <div class="faq-trigger"><input type="text" value="pago / formas de pago / tarjeta" class="faq-input" /></div>
+              <div class="faq-response"><textarea class="faq-textarea">Aceptamos tarjeta de crédito/débito, transferencia y Mercado Pago. ¡También cuotas sin interés!</textarea></div>
+              <button class="btn-delete" onclick="this.parentElement.remove()">✕</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ======================== PIXEL ======================== -->
+      <div class="page" id="page-pixel">
+        <div class="page-header">
+          <h1>Pixel Publicitario</h1>
+          <span class="badge badge-warn">⚠️ Configuración pendiente</span>
+        </div>
+
+        <div class="info-banner">
+          <strong>¿Qué es el Pixel?</strong> Es un código que instalás en tu tienda para rastrear qué hacen los visitantes: qué ven, qué agregan al carrito, qué compran. Esto permite optimizar tus anuncios en Facebook e Instagram para mostrarlos a personas que más probablemente compren.
+        </div>
+
+        <div class="two-col">
+          <div class="card">
+            <div class="card-header">
+              <h3>📘 Facebook Pixel</h3>
+              <span class="pill pill-off" id="fb-status">Inactivo</span>
+            </div>
+            <div class="form-body">
+              <div class="form-group">
+                <label>ID del Pixel de Facebook</label>
+                <input type="text" id="fb-pixel-id" placeholder="Ej: 123456789012345" oninput="updateFBCode()" />
+                <small class="field-hint">Lo encontrás en <strong>Meta Business Suite → Eventos → Pixel</strong></small>
+              </div>
+              <div class="form-group">
+                <label>Token de acceso (Conversions API)</label>
+                <input type="password" id="fb-capi-token" placeholder="EAABsbCS..." />
+                <small class="field-hint">Opcional pero recomendado — mejora precisión un 30%</small>
+              </div>
+              <div class="card-header" style="padding:0;margin:.75rem 0 .5rem"><h4 style="font-size:13px">Eventos a rastrear</h4></div>
+              <div class="toggle-list compact">
+                <div class="toggle-item"><div class="toggle-title">PageView — Vista de página</div><label class="toggle-switch"><input type="checkbox" checked /><span class="switch-track"></span></label></div>
+                <div class="toggle-item"><div class="toggle-title">ViewContent — Vista de producto</div><label class="toggle-switch"><input type="checkbox" checked /><span class="switch-track"></span></label></div>
+                <div class="toggle-item"><div class="toggle-title">AddToCart — Agregar al carrito</div><label class="toggle-switch"><input type="checkbox" checked /><span class="switch-track"></span></label></div>
+                <div class="toggle-item"><div class="toggle-title">InitiateCheckout — Inicio de compra</div><label class="toggle-switch"><input type="checkbox" checked /><span class="switch-track"></span></label></div>
+                <div class="toggle-item"><div class="toggle-title">Purchase — Compra completada</div><label class="toggle-switch"><input type="checkbox" checked /><span class="switch-track"></span></label></div>
+                <div class="toggle-item"><div class="toggle-title">Lead — Formulario completado</div><label class="toggle-switch"><input type="checkbox" /><span class="switch-track"></span></label></div>
+              </div>
+              <div class="code-block" id="fb-code-block">
+                <div class="code-header">Código generado <button class="btn-copy" onclick="copiarCodigo('fb-code-content')">📋 Copiar</button></div>
+                <pre id="fb-code-content">&lt;!-- Facebook Pixel --&gt;
+&lt;script&gt;
+!function(f,b,e,v,n,t,s){...}(window,
+document,'script','https://connect.facebook.net/
+en_US/fbevents.js');
+fbq('init', 'TU_PIXEL_ID');
+fbq('track', 'PageView');
+&lt;/script&gt;</pre>
+              </div>
+              <button class="btn-primary" onclick="activarPixelFB()">⚡ Activar Pixel Facebook</button>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <h3>📸 Instagram Pixel (Meta)</h3>
+              <span class="pill pill-off" id="ig-status">Inactivo</span>
+            </div>
+            <div class="form-body">
+              <div class="info-banner compact">
+                Instagram usa el mismo Pixel que Facebook (Meta Ads). Al activar el de Facebook, automáticamente rastreás Instagram también.
+              </div>
+              <div class="form-group">
+                <label>Cuenta de Instagram</label>
+                <input type="text" id="ig-account" placeholder="@mitienda" />
+              </div>
+              <div class="card-header" style="padding:0;margin:.75rem 0 .5rem"><h4 style="font-size:13px">Funciones avanzadas</h4></div>
+              <div class="toggle-list compact">
+                <div class="toggle-item"><div class="toggle-title">Remarketing — Mostrar ads a visitantes</div><label class="toggle-switch"><input type="checkbox" checked /><span class="switch-track"></span></label></div>
+                <div class="toggle-item"><div class="toggle-title">Lookalike Audiences — Audiencias similares</div><label class="toggle-switch"><input type="checkbox" /><span class="switch-track"></span></label></div>
+                <div class="toggle-item"><div class="toggle-title">Custom Audiences — Listas de clientes</div><label class="toggle-switch"><input type="checkbox" checked /><span class="switch-track"></span></label></div>
+                <div class="toggle-item"><div class="toggle-title">Conversions API (server-side)</div><label class="toggle-switch"><input type="checkbox" /><span class="switch-track"></span></label></div>
+                <div class="toggle-item"><div class="toggle-title">Catálogo de productos Meta</div><label class="toggle-switch"><input type="checkbox" /><span class="switch-track"></span></label></div>
+              </div>
+              <button class="btn-primary" onclick="activarPixelIG()">⚡ Activar Pixel Instagram</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Stats pixel -->
+        <div class="card">
+          <div class="card-header"><h3>📊 Eventos registrados (últimas 24hs)</h3></div>
+          <div class="kpi-grid mini">
+            <div class="kpi-card blue"><div class="kpi-value">1.247</div><div class="kpi-label">PageView</div></div>
+            <div class="kpi-card amber"><div class="kpi-value">184</div><div class="kpi-label">AddToCart</div></div>
+            <div class="kpi-card green"><div class="kpi-value">56</div><div class="kpi-label">Purchase</div></div>
+            <div class="kpi-card red"><div class="kpi-value">4.5%</div><div class="kpi-label">Conv. rate</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ======================== AUDITORÍA ======================== -->
+      <div class="page" id="page-auditoria">
+        <div class="page-header">
+          <h1>Auditoría Gratuita</h1>
+          <span class="badge badge-red">¡Limitado!</span>
+        </div>
+
+        <div class="audit-hero">
+          <div class="audit-hero-text">
+            <h2>¿Tu competencia gana y vos seguís en el siglo pasado?</h2>
+            <p>Analizamos tu negocio digital de arriba a abajo y te entregamos un plan concreto para escalar tus ventas. Sin costo, sin compromiso.</p>
+          </div>
+          <div class="audit-checklist-mini">
+            <div class="check-mini" id="check-pagos"><span class="check-icon">✅</span> Pagos configurados</div>
+            <div class="check-mini" id="check-carrito"><span class="check-icon">✅</span> Carrito abandonado</div>
+            <div class="check-mini" id="check-bot"><span class="check-icon">✅</span> Bot activo</div>
+            <div class="check-mini incomplete" id="check-pixel"><span class="check-icon">⚠️</span> Pixel pendiente</div>
+            <div class="check-mini incomplete" id="check-audit"><span class="check-icon">❌</span> Auditoría pendiente</div>
+          </div>
+        </div>
+
+        <div class="two-col">
+          <div class="card">
+            <div class="card-header"><h3>📋 Formulario de auditoría</h3></div>
+            <div class="form-body">
+              <div class="form-row-2">
+                <div class="form-group">
+                  <label>Nombre del negocio *</label>
+                  <input type="text" id="aud-nombre" placeholder="Mi tienda online" />
+                </div>
+                <div class="form-group">
+                  <label>Rubro / categoría *</label>
+                  <input type="text" id="aud-rubro" placeholder="Ropa, electrónica, servicios..." />
+                </div>
+              </div>
+              <div class="form-row-2">
+                <div class="form-group">
+                  <label>Sitio web o Instagram *</label>
+                  <input type="text" id="aud-web" placeholder="@mitienda o www.mitienda.com" />
+                </div>
+                <div class="form-group">
+                  <label>Email de contacto *</label>
+                  <input type="email" id="aud-email" placeholder="tu@email.com" />
+                </div>
+              </div>
+              <div class="form-group">
+                <label>Ventas mensuales aproximadas</label>
+                <select id="aud-ventas">
+                  <option value="">— Seleccioná —</option>
+                  <option value="0-100k">Menos de $100.000</option>
+                  <option value="100-500k">$100.000 — $500.000</option>
+                  <option value="500k-2m">$500.000 — $2.000.000</option>
+                  <option value="2m+">Más de $2.000.000</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>¿Cuál es tu mayor problema hoy?</label>
+                <textarea id="aud-problema" class="msg-textarea" placeholder="Ej: Tengo muchos seguidores pero pocas ventas. La gente mira pero no compra. No sé cómo automatizar..."></textarea>
+              </div>
+              <div class="form-group">
+                <label>¿Qué plataformas usás?</label>
+                <div class="checkbox-group">
+                  <label class="check-label"><input type="checkbox" /> Tienda Nube</label>
+                  <label class="check-label"><input type="checkbox" /> MercadoShops</label>
+                  <label class="check-label"><input type="checkbox" /> WooCommerce</label>
+                  <label class="check-label"><input type="checkbox" /> Instagram/WhatsApp directo</label>
+                  <label class="check-label"><input type="checkbox" /> Shopify</label>
+                  <label class="check-label"><input type="checkbox" /> Otra</label>
+                </div>
+              </div>
+              <button class="btn-primary large" onclick="enviarAuditoria()">🚀 Solicitar auditoría gratuita</button>
+              <div class="alert alert-success" id="aud-success" style="display:none">
+                ✅ ¡Recibimos tu solicitud! Te contactamos dentro de las próximas 24 horas con tu análisis completo.
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <div class="card">
+              <div class="card-header"><h3>✅ Checklist de implementación</h3></div>
+              <div class="checklist-full">
+                <div class="cl-item done"><span class="cl-icon">✅</span><div><div class="cl-title">Mercado Pago conectado</div><div class="cl-sub">Procesás pagos online — completado</div></div></div>
+                <div class="cl-item done"><span class="cl-icon">✅</span><div><div class="cl-title">Carrito abandonado activo</div><div class="cl-sub">Secuencia 1 y 2 funcionando</div></div></div>
+                <div class="cl-item done"><span class="cl-icon">✅</span><div><div class="cl-title">Bot de respuestas configurado</div><div class="cl-sub">Atendés 24/7 sin esfuerzo</div></div></div>
+                <div class="cl-item warn"><span class="cl-icon">⚠️</span><div><div class="cl-title">Pixel de Facebook</div><div class="cl-sub">Pendiente — perdés datos de conversión</div></div></div>
+                <div class="cl-item warn"><span class="cl-icon">⚠️</span><div><div class="cl-title">Pixel de Instagram</div><div class="cl-sub">Pendiente — anuncios sin optimizar</div></div></div>
+                <div class="cl-item todo"><span class="cl-icon">❌</span><div><div class="cl-title">Auditoría profesional</div><div class="cl-sub">Completá el formulario para acceder</div></div></div>
+                <div class="cl-item todo"><span class="cl-icon">❌</span><div><div class="cl-title">Email marketing automatizado</div><div class="cl-sub">Próxima etapa — newsletters y flows</div></div></div>
+              </div>
+            </div>
+
+            <div class="card" style="margin-top:1rem">
+              <div class="card-header"><h3>📞 Contacto directo</h3></div>
+              <div class="contact-options">
+                <a href="https://wa.me/5491100000000" class="contact-btn whatsapp">💬 WhatsApp</a>
+                <a href="mailto:ventas@ventasauto.com" class="contact-btn email">📧 Email</a>
+                <a href="https://instagram.com/" class="contact-btn instagram">📸 Instagram</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ======================== CONFIGURACIÓN ======================== -->
+      <div class="page" id="page-configuracion">
+        <div class="page-header"><h1>Configuración general</h1></div>
+        <div class="two-col">
+          <div class="card">
+            <div class="card-header"><h3>🏪 Datos de tu tienda</h3></div>
+            <div class="form-body">
+              <div class="form-group">
+                <label>Nombre de la tienda</label>
+                <input type="text" id="cfg-nombre" value="Mi Tienda" oninput="updateStoreName(this.value)" />
+              </div>
+              <div class="form-group">
+                <label>URL de la tienda</label>
+                <input type="text" value="https://mitienda.com" />
+              </div>
+              <div class="form-group">
+                <label>Email de notificaciones</label>
+                <input type="email" value="admin@mitienda.com" />
+              </div>
+              <div class="form-group">
+                <label>WhatsApp de atención</label>
+                <input type="tel" placeholder="+54 9 11 XXXX XXXX" />
+              </div>
+              <button class="btn-primary" onclick="alert('Configuración guardada ✅')">💾 Guardar</button>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header"><h3>🔔 Notificaciones</h3></div>
+            <div class="toggle-list">
+              <div class="toggle-item"><div class="toggle-info"><div class="toggle-title">Nueva venta</div><div class="toggle-sub">Email + push</div></div><label class="toggle-switch"><input type="checkbox" checked /><span class="switch-track"></span></label></div>
+              <div class="toggle-item"><div class="toggle-info"><div class="toggle-title">Carrito recuperado</div><div class="toggle-sub">Email</div></div><label class="toggle-switch"><input type="checkbox" checked /><span class="switch-track"></span></label></div>
+              <div class="toggle-item"><div class="toggle-info"><div class="toggle-title">Nuevo mensaje en bot</div><div class="toggle-sub">Push</div></div><label class="toggle-switch"><input type="checkbox" /><span class="switch-track"></span></label></div>
+              <div class="toggle-item"><div class="toggle-info"><div class="toggle-title">Reporte diario</div><div class="toggle-sub">Email cada mañana</div></div><label class="toggle-switch"><input type="checkbox" checked /><span class="switch-track"></span></label></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Toast notification -->
+  <div class="toast" id="toast"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

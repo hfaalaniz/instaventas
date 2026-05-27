@@ -1,0 +1,185 @@
+/* ============================================================
+   AUTO-VENTAS — Bot config, Messages, Chat simulator
+   ============================================================ */
+
+/* Bot status */
+.bot-status-indicator {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--color-green-bg);
+  color: var(--color-green);
+  font-size: 12px;
+  font-weight: 700;
+  padding: 5px 12px;
+  border-radius: var(--radius-full);
+  border: 1px solid rgba(29,158,117,0.25);
+}
+
+/* Message tabs */
+.msg-tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.msg-tab {
+  background: transparent;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 5px 12px;
+  font-size: 11px;
+  font-weight: 600;
+  font-family: inherit;
+  color: var(--color-text-2);
+  cursor: pointer;
+  transition: all var(--transition);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.msg-tab.active {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: #fff;
+}
+.msg-tab:hover:not(.active) { background: var(--color-bg-3); }
+
+.msg-panel { display: none; }
+.msg-panel.active { display: block; }
+
+.msg-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text-2);
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Variable tags */
+.msg-vars {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.var-tag {
+  display: inline-block;
+  background: var(--color-blue-bg);
+  color: var(--color-blue);
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  font-family: monospace;
+  transition: opacity var(--transition);
+  border: 1px solid rgba(24,95,165,0.2);
+}
+.var-tag:hover { opacity: 0.7; }
+
+/* AI key field toggle */
+#ai-key-field { animation: slideDown 0.2s ease; }
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Keywords list */
+.keyword-row {
+  display: grid;
+  grid-template-columns: 1fr 2fr auto;
+  gap: 8px;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--color-border);
+}
+.keyword-row:last-child { border-bottom: none; }
+
+.kw-trigger { font-size: 12px; font-family: monospace; }
+.kw-response { font-size: 12px; }
+
+.btn-remove-kw {
+  background: transparent;
+  border: none;
+  color: var(--color-text-3);
+  font-size: 16px;
+  cursor: pointer;
+  transition: color var(--transition);
+  display: flex;
+  align-items: center;
+}
+.btn-remove-kw:hover { color: var(--color-red); }
+
+/* Chat simulator */
+.chat-preview {
+  background: var(--color-bg-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  min-height: 200px;
+  max-height: 320px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 10px;
+  scrollbar-width: thin;
+}
+
+.chat-bubble {
+  max-width: 75%;
+  padding: 8px 12px;
+  border-radius: var(--radius-lg);
+  font-size: 12px;
+  line-height: 1.5;
+  animation: bubbleIn 0.2s ease;
+}
+@keyframes bubbleIn {
+  from { opacity: 0; transform: scale(0.9) translateY(4px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+.chat-bubble.bot {
+  background: var(--color-primary-bg);
+  color: var(--color-text);
+  border-bottom-left-radius: 4px;
+  align-self: flex-start;
+  border: 1px solid rgba(233,69,96,0.15);
+}
+.chat-bubble.user {
+  background: var(--color-bg-2);
+  color: var(--color-text);
+  border-bottom-right-radius: 4px;
+  align-self: flex-end;
+  border: 1px solid var(--color-border);
+}
+.chat-bubble.typing {
+  background: var(--color-bg-3);
+  align-self: flex-start;
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  padding: 10px 16px;
+}
+.chat-bubble.typing span {
+  width: 6px; height: 6px;
+  background: var(--color-text-3);
+  border-radius: 50%;
+  animation: typing-dot 1.2s infinite;
+}
+.chat-bubble.typing span:nth-child(2) { animation-delay: 0.2s; }
+.chat-bubble.typing span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes typing-dot {
+  0%, 80%, 100% { transform: scale(1); opacity: 0.5; }
+  40% { transform: scale(1.3); opacity: 1; }
+}
+
+.chat-input-row {
+  display: flex;
+  gap: 8px;
+}
+.chat-input-row input { flex: 1; }
+.chat-input-row .btn-primary { padding: 8px 14px; }

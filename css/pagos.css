@@ -1,0 +1,285 @@
+/* ============================================================
+   PAGOS — Gateways, Payment methods, Checkout
+   ============================================================ */
+
+/* Gateway tabs */
+.gateway-tabs {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.gateway-tab {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--color-bg-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: inherit;
+  color: var(--color-text-2);
+  transition: all var(--transition);
+}
+.gateway-tab.active {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: #fff;
+}
+.gateway-tab:hover:not(.active) {
+  background: var(--color-bg-3);
+  border-color: var(--color-border-2);
+  color: var(--color-text);
+}
+
+.gateway-logo {
+  height: 18px;
+  width: auto;
+  object-fit: contain;
+}
+
+/* Gateway panels */
+.gateway-panel { display: none; }
+.gateway-panel.active { display: block; }
+
+/* MP env tabs */
+.mp-env-tabs {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
+.env-tab {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--color-bg-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 6px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  font-family: inherit;
+  color: var(--color-text-2);
+  transition: all var(--transition);
+}
+.env-tab.active {
+  background: var(--color-blue-bg);
+  border-color: var(--color-blue);
+  color: var(--color-blue);
+}
+
+/* Connection test */
+.connection-test {
+  margin-top: 12px;
+  padding: 10px 14px;
+  border-radius: var(--radius-md);
+  background: var(--color-bg-3);
+  border: 1px solid var(--color-border);
+}
+
+.test-result {
+  font-size: 13px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.test-result.success { color: var(--color-green); }
+.test-result.error   { color: var(--color-red); }
+.test-result.loading { color: var(--color-text-2); }
+
+/* Payment methods grid */
+.payment-methods-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+@media (max-width: 700px) {
+  .payment-methods-grid { grid-template-columns: 1fr; }
+}
+
+.payment-method-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: var(--color-bg-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  transition: border-color var(--transition);
+}
+.payment-method-card:has(input:checked) {
+  border-color: var(--color-primary);
+  background: var(--color-primary-bg);
+}
+
+.pm-icon {
+  font-size: 22px;
+  flex-shrink: 0;
+  width: 36px;
+  text-align: center;
+}
+
+.pm-info { flex: 1; min-width: 0; }
+.pm-name   { font-size: 13px; font-weight: 600; color: var(--color-text); }
+.pm-brands { font-size: 11px; color: var(--color-text-3); margin-top: 1px; }
+
+/* Quota config */
+.quota-config {
+  border-top: 1px solid var(--color-border);
+  padding-top: 12px;
+  margin-top: 12px;
+}
+
+.quota-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.quota-item { }
+.toggle-row-inline {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--color-bg-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text-2);
+  cursor: pointer;
+  transition: all var(--transition);
+}
+
+/* Checkout modes */
+.checkout-modes {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+@media (max-width: 700px) {
+  .checkout-modes { grid-template-columns: 1fr; }
+}
+
+.checkout-option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px;
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  transition: all var(--transition);
+  position: relative;
+}
+.checkout-option:hover { border-color: var(--color-primary); }
+.checkout-option.selected {
+  border-color: var(--color-primary);
+  background: var(--color-primary-bg);
+}
+
+.co-icon { font-size: 22px; flex-shrink: 0; }
+.co-info { flex: 1; }
+.co-name { font-size: 13px; font-weight: 700; color: var(--color-text); }
+.co-desc { font-size: 11px; color: var(--color-text-2); margin-top: 2px; line-height: 1.4; }
+
+.co-badge {
+  font-size: 9px;
+  font-weight: 700;
+  background: var(--color-amber-bg);
+  color: var(--color-amber);
+  padding: 2px 7px;
+  border-radius: var(--radius-full);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.co-check {
+  color: var(--color-primary);
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+/* MP preference result */
+.preference-result {
+  margin-top: 14px;
+  padding: 14px;
+  background: var(--color-green-bg);
+  border: 1px solid rgba(29,158,117,0.3);
+  border-radius: var(--radius-md);
+}
+
+.pref-link {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.pref-url {
+  flex: 1;
+  font-family: monospace;
+  font-size: 12px;
+  background: var(--color-bg-2);
+  padding: 6px 10px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-2);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Crypto */
+.crypto-networks { display: flex; flex-direction: column; gap: 12px; }
+
+.crypto-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px;
+  background: var(--color-bg-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.crypto-icon {
+  font-size: 22px;
+  font-weight: 700;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-bg-2);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  flex-shrink: 0;
+}
+
+.crypto-info { flex: 1; }
+.crypto-name { font-size: 13px; font-weight: 600; margin-bottom: 4px; }
+
+/* Stripe element */
+.stripe-card-element {
+  background: var(--color-bg-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 12px;
+  min-height: 44px;
+}
+
+/* Panel desc */
+.panel-desc {
+  font-size: 13px;
+  color: var(--color-text-2);
+  margin-bottom: 16px;
+  line-height: 1.5;
+}

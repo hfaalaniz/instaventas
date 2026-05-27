@@ -1,0 +1,982 @@
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&family=DM+Sans:wght@400;500;600&display=swap');
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  .app {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--color-background-tertiary);
+    min-height: 100vh;
+    color: var(--color-text-primary);
+  }
+
+  .header {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    padding: 1.5rem 2rem;
+    border-bottom: 3px solid #e94560;
+  }
+
+  .header-badge {
+    display: inline-block;
+    background: #e94560;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 3px 10px;
+    border-radius: 3px;
+    margin-bottom: 8px;
+  }
+
+  .header h1 {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 28px;
+    font-weight: 900;
+    color: #fff;
+    line-height: 1.1;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .header h1 span { color: #e94560; }
+
+  .header-sub {
+    color: rgba(255,255,255,0.6);
+    font-size: 13px;
+    margin-top: 4px;
+  }
+
+  .nav {
+    display: flex;
+    gap: 4px;
+    padding: 0.75rem 2rem;
+    background: var(--color-background-primary);
+    border-bottom: 0.5px solid var(--color-border-tertiary);
+    overflow-x: auto;
+  }
+
+  .nav-btn {
+    background: none;
+    border: 0.5px solid var(--color-border-tertiary);
+    border-radius: var(--border-radius-md);
+    padding: 6px 14px;
+    font-size: 13px;
+    font-family: 'DM Sans', sans-serif;
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.15s;
+  }
+
+  .nav-btn.active {
+    background: #e94560;
+    border-color: #e94560;
+    color: #fff;
+    font-weight: 600;
+  }
+
+  .nav-btn:hover:not(.active) {
+    background: var(--color-background-secondary);
+    border-color: var(--color-border-secondary);
+    color: var(--color-text-primary);
+  }
+
+  .content { padding: 1.5rem 2rem; }
+
+  .section { display: none; }
+  .section.active { display: block; }
+
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: 12px;
+    margin-bottom: 1.5rem;
+  }
+
+  .kpi {
+    background: var(--color-background-secondary);
+    border-radius: var(--border-radius-md);
+    padding: 1rem;
+    text-align: center;
+  }
+
+  .kpi-value {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--color-text-primary);
+  }
+
+  .kpi-value.green { color: #1D9E75; }
+  .kpi-value.red { color: #e94560; }
+  .kpi-value.amber { color: #BA7517; }
+
+  .kpi-label {
+    font-size: 12px;
+    color: var(--color-text-secondary);
+    margin-top: 2px;
+    font-weight: 500;
+  }
+
+  .modules-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 12px;
+    margin-bottom: 1.5rem;
+  }
+
+  .module-card {
+    background: var(--color-background-primary);
+    border: 0.5px solid var(--color-border-tertiary);
+    border-radius: var(--border-radius-lg);
+    padding: 1.25rem;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .module-card:hover {
+    border-color: #e94560;
+    box-shadow: 0 0 0 1px #e9456015;
+  }
+
+  .module-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 10px;
+  }
+
+  .module-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--border-radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+  }
+
+  .icon-blue { background: #E6F1FB; color: #185FA5; }
+  .icon-green { background: #EAF3DE; color: #3B6D11; }
+  .icon-amber { background: #FAEEDA; color: #854F0B; }
+  .icon-red { background: #FCEBEB; color: #e94560; }
+
+  .module-title {
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--color-text-primary);
+  }
+
+  .module-sub {
+    font-size: 12px;
+    color: var(--color-text-secondary);
+    margin-top: 1px;
+  }
+
+  .status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-left: auto;
+    flex-shrink: 0;
+  }
+
+  .dot-on { background: #1D9E75; }
+  .dot-off { background: #888780; }
+  .dot-warn { background: #BA7517; }
+
+  .module-body {
+    font-size: 13px;
+    color: var(--color-text-secondary);
+    line-height: 1.5;
+    border-top: 0.5px solid var(--color-border-tertiary);
+    padding-top: 10px;
+    margin-top: 4px;
+  }
+
+  .module-action {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin-top: 10px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #e94560;
+    cursor: pointer;
+  }
+
+  .activity-feed {
+    background: var(--color-background-primary);
+    border: 0.5px solid var(--color-border-tertiary);
+    border-radius: var(--border-radius-lg);
+    overflow: hidden;
+  }
+
+  .feed-header {
+    padding: 12px 16px;
+    border-bottom: 0.5px solid var(--color-border-tertiary);
+    font-size: 13px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .live-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #1D9E75;
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+
+  .feed-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 16px;
+    border-bottom: 0.5px solid var(--color-border-tertiary);
+    font-size: 13px;
+  }
+
+  .feed-item:last-child { border-bottom: none; }
+
+  .feed-badge {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 3px;
+    white-space: nowrap;
+  }
+
+  .badge-venta { background: #EAF3DE; color: #3B6D11; }
+  .badge-carrito { background: #FAEEDA; color: #854F0B; }
+  .badge-pixel { background: #E6F1FB; color: #185FA5; }
+
+  .feed-time { color: var(--color-text-secondary); margin-left: auto; font-size: 11px; }
+
+  /* PAGOS */
+  .form-section {
+    background: var(--color-background-primary);
+    border: 0.5px solid var(--color-border-tertiary);
+    border-radius: var(--border-radius-lg);
+    padding: 1.25rem;
+    margin-bottom: 12px;
+  }
+
+  .form-title {
+    font-weight: 600;
+    font-size: 14px;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+
+  .form-group { display: flex; flex-direction: column; gap: 4px; }
+  .form-group label { font-size: 12px; color: var(--color-text-secondary); font-weight: 500; }
+  .form-group input, .form-group select { font-family: 'DM Sans', sans-serif; font-size: 13px; }
+
+  .toggle-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 0.5px solid var(--color-border-tertiary);
+  }
+
+  .toggle-row:last-child { border-bottom: none; }
+
+  .toggle-label { font-size: 13px; color: var(--color-text-primary); }
+  .toggle-sub { font-size: 11px; color: var(--color-text-secondary); }
+
+  .toggle {
+    position: relative;
+    width: 36px;
+    height: 20px;
+    flex-shrink: 0;
+  }
+
+  .toggle input { opacity: 0; width: 0; height: 0; }
+
+  .slider-t {
+    position: absolute;
+    inset: 0;
+    background: var(--color-border-tertiary);
+    border-radius: 20px;
+    cursor: pointer;
+    transition: 0.2s;
+  }
+
+  .slider-t::before {
+    content: '';
+    position: absolute;
+    width: 14px;
+    height: 14px;
+    left: 3px;
+    top: 3px;
+    background: white;
+    border-radius: 50%;
+    transition: 0.2s;
+  }
+
+  .toggle input:checked + .slider-t { background: #e94560; }
+  .toggle input:checked + .slider-t::before { transform: translateX(16px); }
+
+  .btn-primary {
+    background: #e94560;
+    color: white;
+    border: none;
+    border-radius: var(--border-radius-md);
+    padding: 10px 20px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: opacity 0.15s;
+  }
+
+  .btn-primary:hover { opacity: 0.88; }
+
+  /* CARRITO */
+  .cart-list {
+    background: var(--color-background-primary);
+    border: 0.5px solid var(--color-border-tertiary);
+    border-radius: var(--border-radius-lg);
+    overflow: hidden;
+    margin-bottom: 12px;
+  }
+
+  .cart-item {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    border-bottom: 0.5px solid var(--color-border-tertiary);
+    font-size: 13px;
+  }
+
+  .cart-item:last-child { border-bottom: none; }
+
+  .cart-name { font-weight: 500; }
+  .cart-email { font-size: 11px; color: var(--color-text-secondary); }
+  .cart-amount { font-weight: 600; font-family: 'Barlow Condensed', sans-serif; font-size: 16px; }
+  .cart-amount.recovered { color: #1D9E75; }
+
+  /* PIXEL */
+  .pixel-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+
+  .pixel-card {
+    background: var(--color-background-primary);
+    border: 0.5px solid var(--color-border-tertiary);
+    border-radius: var(--border-radius-lg);
+    padding: 1.25rem;
+  }
+
+  .pixel-logo {
+    font-size: 24px;
+    margin-bottom: 8px;
+  }
+
+  .pixel-name {
+    font-weight: 600;
+    font-size: 14px;
+    margin-bottom: 4px;
+  }
+
+  .code-box {
+    background: var(--color-background-secondary);
+    border: 0.5px solid var(--color-border-tertiary);
+    border-radius: var(--border-radius-md);
+    padding: 8px 12px;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--color-text-secondary);
+    margin-top: 10px;
+    word-break: break-all;
+  }
+
+  .audit-banner {
+    background: linear-gradient(135deg, #1a1a2e 0%, #0f3460 100%);
+    border-radius: var(--border-radius-lg);
+    padding: 1.5rem;
+    text-align: center;
+    color: white;
+    margin-bottom: 12px;
+  }
+
+  .audit-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 26px;
+    font-weight: 900;
+    text-transform: uppercase;
+    color: #fff;
+  }
+
+  .audit-title span { color: #e94560; }
+
+  .audit-sub {
+    font-size: 13px;
+    color: rgba(255,255,255,0.7);
+    margin: 6px 0 16px;
+  }
+</style>
+
+<div class="app">
+  <div class="header">
+    <div class="header-badge">Sistema automático</div>
+    <h1>Máquina de <span>Ventas</span> Profesional</h1>
+    <div class="header-sub">Tu negocio vende mientras dormís</div>
+  </div>
+
+  <div class="nav">
+    <button class="nav-btn active" onclick="showSection('dashboard')" id="tab-dashboard">
+      <i class="ti ti-layout-dashboard" aria-hidden="true"></i> Dashboard
+    </button>
+    <button class="nav-btn" onclick="showSection('pagos')" id="tab-pagos">
+      <i class="ti ti-credit-card" aria-hidden="true"></i> Pagos
+    </button>
+    <button class="nav-btn" onclick="showSection('carrito')" id="tab-carrito">
+      <i class="ti ti-shopping-cart" aria-hidden="true"></i> Carrito abandonado
+    </button>
+    <button class="nav-btn" onclick="showSection('ventas')" id="tab-ventas">
+      <i class="ti ti-robot" aria-hidden="true"></i> Auto-ventas
+    </button>
+    <button class="nav-btn" onclick="showSection('pixel')" id="tab-pixel">
+      <i class="ti ti-brand-facebook" aria-hidden="true"></i> Pixel
+    </button>
+    <button class="nav-btn" onclick="showSection('auditoria')" id="tab-auditoria">
+      <i class="ti ti-clipboard-check" aria-hidden="true"></i> Auditoría
+    </button>
+  </div>
+
+  <div class="content">
+
+    <!-- DASHBOARD -->
+    <div class="section active" id="section-dashboard">
+      <h2 style="sr-only">Panel de ventas automáticas</h2>
+      <div class="kpi-grid">
+        <div class="kpi">
+          <div class="kpi-value green" id="kpi-ventas">$0</div>
+          <div class="kpi-label">Ventas hoy</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-value" id="kpi-pedidos">0</div>
+          <div class="kpi-label">Pedidos</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-value amber" id="kpi-recuperados">$0</div>
+          <div class="kpi-label">Recuperado</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-value red" id="kpi-abandon">0%</div>
+          <div class="kpi-label">Abandono</div>
+        </div>
+      </div>
+
+      <div class="modules-grid">
+        <div class="module-card" onclick="showSection('pagos')">
+          <div class="module-header">
+            <div class="module-icon icon-blue"><i class="ti ti-credit-card" aria-hidden="true"></i></div>
+            <div>
+              <div class="module-title">Configuración de pagos</div>
+              <div class="module-sub">Mercado Pago y pasarelas</div>
+            </div>
+            <div class="status-dot dot-on"></div>
+          </div>
+          <div class="module-body">
+            Recibí pagos con tarjeta, transferencia y efectivo. Mercado Pago integrado y activo.
+            <div class="module-action"><i class="ti ti-arrow-right"></i> Configurar</div>
+          </div>
+        </div>
+
+        <div class="module-card" onclick="showSection('carrito')">
+          <div class="module-header">
+            <div class="module-icon icon-amber"><i class="ti ti-shopping-cart" aria-hidden="true"></i></div>
+            <div>
+              <div class="module-title">Recuperación de carrito</div>
+              <div class="module-sub">Ventas perdidas automáticas</div>
+            </div>
+            <div class="status-dot dot-warn"></div>
+          </div>
+          <div class="module-body">
+            Enviá mensajes automáticos a quienes no completaron su compra y recuperá esas ventas.
+            <div class="module-action"><i class="ti ti-arrow-right"></i> Ver carritos</div>
+          </div>
+        </div>
+
+        <div class="module-card" onclick="showSection('ventas')">
+          <div class="module-header">
+            <div class="module-icon icon-green"><i class="ti ti-robot" aria-hidden="true"></i></div>
+            <div>
+              <div class="module-title">Sistema auto-ventas</div>
+              <div class="module-sub">Tu tienda vende sola</div>
+            </div>
+            <div class="status-dot dot-on"></div>
+          </div>
+          <div class="module-body">
+            Respuestas automáticas, cotizaciones y seguimiento sin intervención humana. 24/7.
+            <div class="module-action"><i class="ti ti-arrow-right"></i> Configurar bot</div>
+          </div>
+        </div>
+
+        <div class="module-card" onclick="showSection('pixel')">
+          <div class="module-header">
+            <div class="module-icon icon-red"><i class="ti ti-brand-facebook" aria-hidden="true"></i></div>
+            <div>
+              <div class="module-title">Pixel publicitario</div>
+              <div class="module-sub">Facebook e Instagram</div>
+            </div>
+            <div class="status-dot dot-off"></div>
+          </div>
+          <div class="module-body">
+            Instalá los píxeles de Facebook e Instagram para rastrear conversiones y optimizar anuncios.
+            <div class="module-action"><i class="ti ti-arrow-right"></i> Instalar pixel</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="activity-feed">
+        <div class="feed-header">
+          <div class="live-dot"></div>
+          Actividad en tiempo real
+        </div>
+        <div id="feed-list">
+          <div class="feed-item">
+            <span class="feed-badge badge-venta">Venta</span>
+            <span>María G. compró Producto A — $12.500</span>
+            <span class="feed-time">hace 2 min</span>
+          </div>
+          <div class="feed-item">
+            <span class="feed-badge badge-carrito">Carrito</span>
+            <span>Recordatorio enviado a lucas@mail.com</span>
+            <span class="feed-time">hace 8 min</span>
+          </div>
+          <div class="feed-item">
+            <span class="feed-badge badge-venta">Venta</span>
+            <span>Carlos R. compró Producto B — $8.200</span>
+            <span class="feed-time">hace 15 min</span>
+          </div>
+          <div class="feed-item">
+            <span class="feed-badge badge-pixel">Pixel</span>
+            <span>Evento "AddToCart" registrado — Instagram</span>
+            <span class="feed-time">hace 21 min</span>
+          </div>
+          <div class="feed-item">
+            <span class="feed-badge badge-carrito">Recuperado</span>
+            <span>Ana P. completó su compra tras recordatorio — $6.900</span>
+            <span class="feed-time">hace 34 min</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PAGOS -->
+    <div class="section" id="section-pagos">
+      <div class="form-section">
+        <div class="form-title"><i class="ti ti-credit-card" aria-hidden="true"></i> Mercado Pago</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Access Token (Producción)</label>
+            <input type="password" placeholder="APP_USR-..." value="APP_USR-demo-token" />
+          </div>
+          <div class="form-group">
+            <label>Public Key</label>
+            <input type="text" placeholder="APP_USR-xxxxx" value="APP_USR-pub-demo" />
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>País</label>
+            <select>
+              <option selected>Argentina</option>
+              <option>Chile</option>
+              <option>México</option>
+              <option>Colombia</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Moneda</label>
+            <select>
+              <option selected>ARS — Peso argentino</option>
+              <option>USD — Dólar</option>
+            </select>
+          </div>
+        </div>
+        <button class="btn-primary"><i class="ti ti-check"></i> Guardar configuración</button>
+      </div>
+
+      <div class="form-section">
+        <div class="form-title"><i class="ti ti-settings" aria-hidden="true"></i> Métodos habilitados</div>
+        <div class="toggle-row">
+          <div><div class="toggle-label">Tarjeta de crédito / débito</div><div class="toggle-sub">Visa, Mastercard, Amex</div></div>
+          <label class="toggle"><input type="checkbox" checked /><span class="slider-t"></span></label>
+        </div>
+        <div class="toggle-row">
+          <div><div class="toggle-label">Transferencia bancaria</div><div class="toggle-sub">CVU / CBU</div></div>
+          <label class="toggle"><input type="checkbox" checked /><span class="slider-t"></span></label>
+        </div>
+        <div class="toggle-row">
+          <div><div class="toggle-label">Pago en efectivo (Rapipago / Pago Fácil)</div><div class="toggle-sub">Genera cupón automático</div></div>
+          <label class="toggle"><input type="checkbox" /><span class="slider-t"></span></label>
+        </div>
+        <div class="toggle-row">
+          <div><div class="toggle-label">Cuotas sin interés</div><div class="toggle-sub">Hasta 12 cuotas</div></div>
+          <label class="toggle"><input type="checkbox" checked /><span class="slider-t"></span></label>
+        </div>
+        <div class="toggle-row">
+          <div><div class="toggle-label">Checkout Pro (redirect)</div><div class="toggle-sub">Redirige a Mercado Pago</div></div>
+          <label class="toggle"><input type="checkbox" checked /><span class="slider-t"></span></label>
+        </div>
+        <div class="toggle-row">
+          <div><div class="toggle-label">Checkout API (embebido)</div><div class="toggle-sub">Formulario en tu tienda</div></div>
+          <label class="toggle"><input type="checkbox" /><span class="slider-t"></span></label>
+        </div>
+      </div>
+    </div>
+
+    <!-- CARRITO -->
+    <div class="section" id="section-carrito">
+      <div class="form-section">
+        <div class="form-title"><i class="ti ti-send" aria-hidden="true"></i> Secuencia de recuperación</div>
+        <div class="toggle-row">
+          <div><div class="toggle-label">Recordatorio 1 — 1 hora después</div><div class="toggle-sub">Email automático con enlace al carrito</div></div>
+          <label class="toggle"><input type="checkbox" checked /><span class="slider-t"></span></label>
+        </div>
+        <div class="toggle-row">
+          <div><div class="toggle-label">Recordatorio 2 — 24 horas después</div><div class="toggle-sub">Email con descuento del 10%</div></div>
+          <label class="toggle"><input type="checkbox" checked /><span class="slider-t"></span></label>
+        </div>
+        <div class="toggle-row">
+          <div><div class="toggle-label">Recordatorio 3 — 48 horas después</div><div class="toggle-sub">WhatsApp (si número disponible)</div></div>
+          <label class="toggle"><input type="checkbox" /><span class="slider-t"></span></label>
+        </div>
+        <div class="toggle-row">
+          <div><div class="toggle-label">Descuento automático en recuperación</div><div class="toggle-sub">Ofrecer cupón de descuento</div></div>
+          <label class="toggle"><input type="checkbox" checked /><span class="slider-t"></span></label>
+        </div>
+        <div class="form-row" style="margin-top:12px">
+          <div class="form-group">
+            <label>% de descuento en recuperación</label>
+            <input type="number" value="10" min="1" max="50" />
+          </div>
+          <div class="form-group">
+            <label>Validez del cupón (horas)</label>
+            <input type="number" value="24" min="1" max="168" />
+          </div>
+        </div>
+        <button class="btn-primary"><i class="ti ti-device-floppy"></i> Guardar secuencia</button>
+      </div>
+
+      <div class="cart-list">
+        <div style="padding: 12px 16px; border-bottom: 0.5px solid var(--color-border-tertiary); font-size: 13px; font-weight: 600; color: var(--color-text-secondary);">Carritos abandonados recientes</div>
+        <div class="cart-item">
+          <div><div class="cart-name">Lucas Martínez</div><div class="cart-email">lucas@mail.com · hace 2h</div></div>
+          <span class="feed-badge badge-carrito">1° recordatorio</span>
+          <div class="cart-amount">$15.300</div>
+        </div>
+        <div class="cart-item">
+          <div><div class="cart-name">Valentina Sosa</div><div class="cart-email">vale.s@gmail.com · hace 5h</div></div>
+          <span class="feed-badge badge-carrito">2° recordatorio</span>
+          <div class="cart-amount">$9.800</div>
+        </div>
+        <div class="cart-item">
+          <div><div class="cart-name">Roberto Díaz</div><div class="cart-email">rdi@hotmail.com · hace 1d</div></div>
+          <span class="feed-badge" style="background:#EAF3DE;color:#3B6D11">Recuperado ✓</span>
+          <div class="cart-amount recovered">$22.000</div>
+        </div>
+        <div class="cart-item">
+          <div><div class="cart-name">Florencia Ruiz</div><div class="cart-email">flor.r@yahoo.com · hace 2d</div></div>
+          <span class="feed-badge badge-carrito">3° recordatorio</span>
+          <div class="cart-amount">$7.400</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- AUTO-VENTAS -->
+    <div class="section" id="section-ventas">
+      <div class="form-section">
+        <div class="form-title"><i class="ti ti-robot" aria-hidden="true"></i> Bot de respuestas automáticas</div>
+        <div class="toggle-row">
+          <div><div class="toggle-label">Respuesta automática a DMs de Instagram</div><div class="toggle-sub">Responde consultas frecuentes al instante</div></div>
+          <label class="toggle"><input type="checkbox" checked /><span class="slider-t"></span></label>
+        </div>
+        <div class="toggle-row">
+          <div><div class="toggle-label">Cotización automática por WhatsApp</div><div class="toggle-sub">Envía precios y catálogo automáticamente</div></div>
+          <label class="toggle"><input type="checkbox" checked /><span class="slider-t"></span></label>
+        </div>
+        <div class="toggle-row">
+          <div><div class="toggle-label">Follow-up post-compra</div><div class="toggle-sub">Solicita reseña 3 días después</div></div>
+          <label class="toggle"><input type="checkbox" /><span class="slider-t"></span></label>
+        </div>
+        <div class="toggle-row">
+          <div><div class="toggle-label">Modo nocturno activo</div><div class="toggle-sub">El bot trabaja de 22:00 a 08:00</div></div>
+          <label class="toggle"><input type="checkbox" checked /><span class="slider-t"></span></label>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="form-title"><i class="ti ti-message" aria-hidden="true"></i> Mensaje de bienvenida automático</div>
+        <div class="form-group" style="margin-bottom:12px">
+          <label>Mensaje cuando alguien escribe por primera vez</label>
+          <textarea style="font-family:'DM Sans',sans-serif;font-size:13px;width:100%;padding:8px 12px;border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);min-height:80px;resize:vertical;background:var(--color-background-secondary);color:var(--color-text-primary)">¡Hola! 👋 Gracias por contactarnos. Somos [Tienda]. ¿En qué te podemos ayudar hoy? Respondemos al instante.</textarea>
+        </div>
+        <button class="btn-primary"><i class="ti ti-device-floppy"></i> Guardar bot</button>
+      </div>
+
+      <div class="kpi-grid">
+        <div class="kpi">
+          <div class="kpi-value green">98%</div>
+          <div class="kpi-label">Tasa respuesta</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-value">1.4s</div>
+          <div class="kpi-label">Tiempo respuesta</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-value amber">34</div>
+          <div class="kpi-label">Chats hoy</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-value green">12</div>
+          <div class="kpi-label">Convertidos</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PIXEL -->
+    <div class="section" id="section-pixel">
+      <div class="pixel-grid">
+        <div class="pixel-card">
+          <div class="pixel-logo">📘</div>
+          <div class="pixel-name">Facebook Pixel</div>
+          <div style="font-size:12px;color:var(--color-text-secondary);margin-bottom:10px">Rastreo de conversiones en tu tienda</div>
+          <div class="form-group" style="margin-bottom:10px">
+            <label>ID del Pixel</label>
+            <input type="text" placeholder="123456789012345" />
+          </div>
+          <div class="toggle-row" style="padding:6px 0">
+            <div class="toggle-label" style="font-size:12px">PageView</div>
+            <label class="toggle"><input type="checkbox" checked /><span class="slider-t"></span></label>
+          </div>
+          <div class="toggle-row" style="padding:6px 0">
+            <div class="toggle-label" style="font-size:12px">AddToCart</div>
+            <label class="toggle"><input type="checkbox" checked /><span class="slider-t"></span></label>
+          </div>
+          <div class="toggle-row" style="padding:6px 0">
+            <div class="toggle-label" style="font-size:12px">Purchase</div>
+            <label class="toggle"><input type="checkbox" checked /><span class="slider-t"></span></label>
+          </div>
+          <div class="toggle-row" style="padding:6px 0">
+            <div class="toggle-label" style="font-size:12px">ViewContent</div>
+            <label class="toggle"><input type="checkbox" /><span class="slider-t"></span></label>
+          </div>
+          <div class="code-box" id="fb-code">fbq('init', '[TU_PIXEL_ID]');<br>fbq('track', 'PageView');</div>
+          <button class="btn-primary" style="margin-top:10px;font-size:12px"><i class="ti ti-check"></i> Activar pixel</button>
+        </div>
+
+        <div class="pixel-card">
+          <div class="pixel-logo">📸</div>
+          <div class="pixel-name">Instagram Pixel</div>
+          <div style="font-size:12px;color:var(--color-text-secondary);margin-bottom:10px">Mismo pixel que Facebook — Meta Ads</div>
+          <div class="form-group" style="margin-bottom:10px">
+            <label>ID del Pixel (Meta)</label>
+            <input type="text" placeholder="Mismo ID que Facebook" />
+          </div>
+          <div class="toggle-row" style="padding:6px 0">
+            <div class="toggle-label" style="font-size:12px">Rastreo de stories</div>
+            <label class="toggle"><input type="checkbox" checked /><span class="slider-t"></span></label>
+          </div>
+          <div class="toggle-row" style="padding:6px 0">
+            <div class="toggle-label" style="font-size:12px">Conversiones API (CAPI)</div>
+            <label class="toggle"><input type="checkbox" /><span class="slider-t"></span></label>
+          </div>
+          <div class="toggle-row" style="padding:6px 0">
+            <div class="toggle-label" style="font-size:12px">Audiences personalizadas</div>
+            <label class="toggle"><input type="checkbox" checked /><span class="slider-t"></span></label>
+          </div>
+          <div class="toggle-row" style="padding:6px 0">
+            <div class="toggle-label" style="font-size:12px">Lookalike audiences</div>
+            <label class="toggle"><input type="checkbox" /><span class="slider-t"></span></label>
+          </div>
+          <div class="code-box">// Meta Pixel compartido<br>// Configura desde Meta Business Suite</div>
+          <button class="btn-primary" style="margin-top:10px;font-size:12px"><i class="ti ti-check"></i> Activar pixel</button>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="form-title"><i class="ti ti-chart-bar" aria-hidden="true"></i> Eventos registrados hoy</div>
+        <div class="kpi-grid">
+          <div class="kpi">
+            <div class="kpi-value">847</div>
+            <div class="kpi-label">PageView</div>
+          </div>
+          <div class="kpi">
+            <div class="kpi-value amber">124</div>
+            <div class="kpi-label">AddToCart</div>
+          </div>
+          <div class="kpi">
+            <div class="kpi-value green">38</div>
+            <div class="kpi-label">Purchase</div>
+          </div>
+          <div class="kpi">
+            <div class="kpi-value" style="color:#185FA5">4.5%</div>
+            <div class="kpi-label">Conv. rate</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- AUDITORÍA -->
+    <div class="section" id="section-auditoria">
+      <div class="audit-banner">
+        <div class="audit-title">Auditoría <span>Gratuita</span></div>
+        <div class="audit-sub">Analizamos tu negocio digital y te decimos exactamente qué mejorar</div>
+        <button class="btn-primary" onclick="sendPrompt('Quiero hacer una auditoría gratuita de mi negocio digital. Ayudame a completar el formulario paso a paso.')">
+          <i class="ti ti-clipboard-check"></i> Iniciar auditoría ↗
+        </button>
+      </div>
+
+      <div class="form-section">
+        <div class="form-title"><i class="ti ti-building-store" aria-hidden="true"></i> Datos de tu negocio</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Nombre del negocio</label>
+            <input type="text" placeholder="Mi tienda online" />
+          </div>
+          <div class="form-group">
+            <label>Rubro / categoría</label>
+            <input type="text" placeholder="Ropa, electrónica, servicios..." />
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Sitio web o Instagram</label>
+            <input type="text" placeholder="@mitienda o www.mitienda.com" />
+          </div>
+          <div class="form-group">
+            <label>Ventas mensuales aproximadas</label>
+            <select>
+              <option>Menos de $100.000</option>
+              <option>$100k — $500k</option>
+              <option>$500k — $2M</option>
+              <option>Más de $2M</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group" style="margin-bottom:12px">
+          <label>¿Cuál es tu mayor problema hoy?</label>
+          <textarea style="font-family:'DM Sans',sans-serif;font-size:13px;width:100%;padding:8px 12px;border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);min-height:70px;resize:vertical;background:var(--color-background-secondary);color:var(--color-text-primary)" placeholder="Ej: No sé por qué la gente no termina de comprar, tengo muchos seguidores pero pocas ventas..."></textarea>
+        </div>
+        <button class="btn-primary" onclick="sendPrompt('Ayudame a diagnosticar mi negocio digital basándome en los síntomas que describí: muchos seguidores pero pocas ventas. Dame un plan concreto.')">
+          <i class="ti ti-send"></i> Enviar para análisis ↗
+        </button>
+      </div>
+
+      <div class="form-section">
+        <div class="form-title"><i class="ti ti-list-check" aria-hidden="true"></i> Checklist del sistema</div>
+        <div id="checklist">
+          <div class="toggle-row">
+            <div><div class="toggle-label">Mercado Pago conectado</div><div class="toggle-sub">Procesá pagos online</div></div>
+            <i class="ti ti-circle-check" style="font-size:20px;color:#1D9E75" aria-hidden="true"></i>
+          </div>
+          <div class="toggle-row">
+            <div><div class="toggle-label">Carrito abandonado activo</div><div class="toggle-sub">Recuperá ventas perdidas</div></div>
+            <i class="ti ti-circle-check" style="font-size:20px;color:#1D9E75" aria-hidden="true"></i>
+          </div>
+          <div class="toggle-row">
+            <div><div class="toggle-label">Bot de respuestas configurado</div><div class="toggle-sub">Vendé mientras dormís</div></div>
+            <i class="ti ti-circle-check" style="font-size:20px;color:#1D9E75" aria-hidden="true"></i>
+          </div>
+          <div class="toggle-row">
+            <div><div class="toggle-label">Pixel de Facebook instalado</div><div class="toggle-sub">Rastreá conversiones</div></div>
+            <i class="ti ti-circle-minus" style="font-size:20px;color:#BA7517" aria-hidden="true"></i>
+          </div>
+          <div class="toggle-row">
+            <div><div class="toggle-label">Pixel de Instagram activo</div><div class="toggle-sub">Optimizá anuncios</div></div>
+            <i class="ti ti-circle-minus" style="font-size:20px;color:#BA7517" aria-hidden="true"></i>
+          </div>
+          <div class="toggle-row">
+            <div><div class="toggle-label">Auditoría completada</div><div class="toggle-sub">Diagnóstico profesional</div></div>
+            <i class="ti ti-circle-x" style="font-size:20px;color:#e94560" aria-hidden="true"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  function showSection(id) {
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('section-' + id).classList.add('active');
+    document.getElementById('tab-' + id).classList.add('active');
+  }
+
+  const ventas = [148500, 157200, 134900, 169800, 142300];
+  const pedidos = [12, 15, 10, 17, 13];
+  let idx = 0;
+
+  function updateKPIs() {
+    document.getElementById('kpi-ventas').textContent = '$' + ventas[idx % ventas.length].toLocaleString('es-AR');
+    document.getElementById('kpi-pedidos').textContent = pedidos[idx % pedidos.length];
+    document.getElementById('kpi-recuperados').textContent = '$' + Math.round(ventas[idx % ventas.length] * 0.18).toLocaleString('es-AR');
+    document.getElementById('kpi-abandon').textContent = Math.round(22 + Math.random() * 10) + '%';
+    idx++;
+  }
+
+  updateKPIs();
+  setInterval(updateKPIs, 5000);
+
+  const feedItems = [
+    {type:'Venta',cls:'badge-venta',msg:'Sofía T. compró Pack Premium — $28.000'},
+    {type:'Carrito',cls:'badge-carrito',msg:'Recordatorio enviado a pedro@mail.com'},
+    {type:'Venta',cls:'badge-venta',msg:'Juan M. compró Producto C — $4.500'},
+    {type:'Pixel',cls:'badge-pixel',msg:'Evento "Purchase" registrado — Facebook'},
+    {type:'Recuperado',cls:'badge-venta',msg:'Emilio R. completó su compra — $11.200'},
+  ];
+
+  let feedIdx = 0;
+  setInterval(() => {
+    const feed = document.getElementById('feed-list');
+    const item = feedItems[feedIdx % feedItems.length];
+    const div = document.createElement('div');
+    div.className = 'feed-item';
+    div.style.opacity = '0';
+    div.style.transition = 'opacity 0.4s';
+    div.innerHTML = `<span class="feed-badge ${item.cls}">${item.type}</span><span>${item.msg}</span><span class="feed-time">ahora</span>`;
+    feed.insertBefore(div, feed.firstChild);
+    setTimeout(() => div.style.opacity = '1', 50);
+    if (feed.children.length > 6) feed.removeChild(feed.lastChild);
+    feedIdx++;
+  }, 7000);
+</script>
