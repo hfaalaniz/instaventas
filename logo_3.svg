@@ -1,0 +1,160 @@
+<svg viewBox="0 0 1024 1024" width="1024" height="1024" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Fondo degradado naranja → rosa → violeta -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"   stop-color="#FF6B35"/>
+      <stop offset="48%"  stop-color="#FF3CAC"/>
+      <stop offset="100%" stop-color="#784BA0"/>
+    </linearGradient>
+
+    <!-- Degradado para el aro exterior -->
+    <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"   stop-color="rgba(255,255,255,0.55)"/>
+      <stop offset="100%" stop-color="rgba(255,255,255,0.10)"/>
+    </linearGradient>
+
+    <!-- Degradado para la M -->
+    <linearGradient id="mGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%"   stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="rgba(255,255,255,0.88)"/>
+    </linearGradient>
+
+    <!-- Degradado overlay luminoso centro -->
+    <radialGradient id="centerLight" cx="50%" cy="42%" r="55%">
+      <stop offset="0%"   stop-color="rgba(255,255,255,0.22)"/>
+      <stop offset="100%" stop-color="rgba(255,255,255,0)"/>
+    </radialGradient>
+
+    <!-- Degradado overlay esquina superior izquierda -->
+    <radialGradient id="cornerLight" cx="0%" cy="0%" r="70%">
+      <stop offset="0%"   stop-color="rgba(255,200,100,0.18)"/>
+      <stop offset="100%" stop-color="rgba(255,200,100,0)"/>
+    </radialGradient>
+
+    <!-- Sombra suave para la M -->
+    <filter id="mShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="8" stdDeviation="16" flood-color="rgba(80,0,60,0.35)"/>
+    </filter>
+
+    <!-- Glow suave para el punto central -->
+    <filter id="dotGlow" x="-80%" y="-80%" width="260%" height="260%">
+      <feGaussianBlur stdDeviation="10"/>
+    </filter>
+
+    <clipPath id="roundClip">
+      <rect width="1024" height="1024" rx="210" ry="210"/>
+    </clipPath>
+  </defs>
+
+  <!-- Fondo degradado -->
+  <rect width="1024" height="1024" rx="210" ry="210" fill="url(#bgGrad)"/>
+
+  <!-- Overlay luminoso central -->
+  <rect width="1024" height="1024" rx="210" ry="210" fill="url(#centerLight)"/>
+
+  <!-- Overlay esquina cálida -->
+  <rect width="1024" height="1024" rx="210" ry="210" fill="url(#cornerLight)"/>
+
+  <!-- Textura líneas diagonales muy sutiles -->
+  <g clip-path="url(#roundClip)" opacity="0.04">
+    <line x1="-100" y1="300"  x2="400"  y2="-100" stroke="white" stroke-width="60"/>
+    <line x1="100"  y1="600"  x2="700"  y2="100"  stroke="white" stroke-width="60"/>
+    <line x1="300"  y1="900"  x2="1000" y2="300"  stroke="white" stroke-width="60"/>
+    <line x1="600"  y1="1100" x2="1200" y2="600"  stroke="white" stroke-width="60"/>
+  </g>
+
+  <!-- Aro exterior blanco translúcido -->
+  <circle cx="512" cy="430" r="318" fill="none" stroke="url(#ringGrad)" stroke-width="2"/>
+
+  <!-- Aro interior más sutil -->
+  <circle cx="512" cy="430" r="285" fill="none" stroke="rgba(255,255,255,0.14)" stroke-width="1"/>
+
+  <!-- Relleno interior muy translúcido -->
+  <circle cx="512" cy="430" r="318" fill="rgba(255,255,255,0.07)"/>
+
+  <!-- Arco decorativo parcial superior -->
+  <circle cx="512" cy="430" r="350" fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="1.5" stroke-dasharray="480 1720"/>
+
+  <!-- === M blanca con sombra === -->
+  <g filter="url(#mShadow)">
+    <line x1="318" y1="598" x2="318" y2="282" stroke="url(#mGrad)" stroke-width="60" stroke-linecap="round"/>
+    <line x1="706" y1="598" x2="706" y2="282" stroke="url(#mGrad)" stroke-width="60" stroke-linecap="round"/>
+    <line x1="318" y1="282" x2="512" y2="474" stroke="url(#mGrad)" stroke-width="54" stroke-linecap="round"/>
+    <line x1="706" y1="282" x2="512" y2="474" stroke="url(#mGrad)" stroke-width="54" stroke-linecap="round"/>
+  </g>
+
+  <!-- Punto central: glow detrás -->
+  <circle cx="512" cy="474" r="44" fill="rgba(255,255,255,0.6)" filter="url(#dotGlow)"/>
+
+  <!-- Punto central: círculo blanco -->
+  <circle cx="512" cy="474" r="26" fill="#ffffff"/>
+
+  <!-- Punto central: núcleo naranja -->
+  <circle cx="512" cy="474" r="13" fill="#FF6B35"/>
+
+  <!-- Pequeño highlight en el dot -->
+  <circle cx="504" cy="466" r="5" fill="rgba(255,255,255,0.7)"/>
+
+  <!-- Puntos en vértices superiores de la M -->
+  <circle cx="318" cy="282" r="12" fill="rgba(255,255,255,0.5)"/>
+  <circle cx="706" cy="282" r="12" fill="rgba(255,255,255,0.5)"/>
+
+  <!-- === TEXTO === -->
+  <!-- Línea decorativa superior al texto -->
+  <rect x="210" y="664" width="604" height="1.5" rx="1" fill="rgba(255,255,255,0.25)"/>
+
+  <!-- "MÁQUINA DE VENTAS" -->
+  <text
+    x="512" y="742"
+    font-family="'Arial Black', 'Arial', sans-serif"
+    font-size="78"
+    font-weight="900"
+    letter-spacing="3"
+    text-anchor="middle"
+    fill="#ffffff">MÁQUINA DE VENTAS</text>
+
+  <!-- Línea separadora blanca -->
+  <rect x="318" y="762" width="388" height="2.5" rx="1" fill="rgba(255,255,255,0.40)"/>
+
+  <!-- "PROFESIONAL" espaciado -->
+  <text
+    x="512" y="828"
+    font-family="'Arial', sans-serif"
+    font-size="42"
+    font-weight="400"
+    letter-spacing="20"
+    text-anchor="middle"
+    fill="rgba(255,255,255,0.75)">PROFESIONAL</text>
+
+  <!-- Badge "by InstaVentas" -->
+  <rect x="356" y="866" width="312" height="48" rx="24" fill="rgba(255,255,255,0.12)" stroke="rgba(255,255,255,0.35)" stroke-width="1.2"/>
+  <text
+    x="512" y="898"
+    font-family="'Arial', sans-serif"
+    font-size="22"
+    font-weight="600"
+    letter-spacing="4"
+    text-anchor="middle"
+    fill="rgba(255,255,255,0.70)">by InstaVentas</text>
+
+  <!-- Destellos decorativos -->
+  <!-- Cruz superior izquierda -->
+  <line x1="152" y1="162" x2="152" y2="200" stroke="white" stroke-width="2.5" stroke-linecap="round" opacity="0.45"/>
+  <line x1="133" y1="181" x2="171" y2="181" stroke="white" stroke-width="2.5" stroke-linecap="round" opacity="0.45"/>
+
+  <!-- Cruz superior derecha -->
+  <line x1="872" y1="162" x2="872" y2="192" stroke="white" stroke-width="2" stroke-linecap="round" opacity="0.35"/>
+  <line x1="857" y1="177" x2="887" y2="177" stroke="white" stroke-width="2" stroke-linecap="round" opacity="0.35"/>
+
+  <!-- Cruz inferior derecha -->
+  <line x1="872" y1="848" x2="872" y2="874" stroke="white" stroke-width="2" stroke-linecap="round" opacity="0.30"/>
+  <line x1="859" y1="861" x2="885" y2="861" stroke="white" stroke-width="2" stroke-linecap="round" opacity="0.30"/>
+
+  <!-- Puntos decorativos flotantes -->
+  <circle cx="184" cy="640" r="4" fill="rgba(255,255,255,0.30)"/>
+  <circle cx="840" cy="220" r="5" fill="rgba(255,255,255,0.25)"/>
+  <circle cx="820" cy="740" r="3.5" fill="rgba(255,255,255,0.22)"/>
+  <circle cx="200" cy="300" r="3" fill="rgba(255,255,255,0.20)"/>
+  <circle cx="512" cy="132" r="5" fill="rgba(255,255,255,0.30)"/>
+  <circle cx="512" cy="962" r="4" fill="rgba(255,255,255,0.22)"/>
+</svg>
