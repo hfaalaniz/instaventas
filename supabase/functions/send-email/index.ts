@@ -46,7 +46,7 @@ Deno.serve(async (req: Request) => {
 
   const emailConfig = configRow?.email || {};
   const provider    = emailConfig.provider || 'resend';
-  const fromEmail   = emailConfig.smtp?.from || emailConfig.sendgrid?.from || emailConfig.brevo?.from || 'noreply@instaventas.com';
+  const fromEmail   = emailConfig.smtp?.from || emailConfig.sendgrid?.from || emailConfig.brevo?.from || 'onboarding@resend.dev';
   const fromName    = emailConfig.smtp?.from_name || 'InstaVentas';
 
   // Construir body HTML
